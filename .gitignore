@@ -27,5 +27,5 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Data peserta dan pemeriksaan (jangan upload)
-data/*.csv
+# Data dummy untuk kebutuhan demo
+# CSV di folder data boleh di-upload ke GitHub
