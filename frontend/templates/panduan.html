@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Panduan Website — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<section class="guide-page">
+  <header class="guide-hero card">
+    <span class="guide-icon"><i class="fas fa-route"></i></span>
+    <div><p class="eyebrow">Panduan penggunaan</p><h1>Panduan Website</h1><p>Ikuti langkah berikut untuk menggunakan JEJAK TUMBUH dari awal sampai melihat hasil pemeriksaan.</p></div>
+  </header>
+
+  <ol class="guide-steps">
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-house-chimney"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 1</span><h2>Buka landing page</h2><p>Landing page memiliki tiga tahap. Gunakan tombol <strong>Next</strong> dan <strong>Previous</strong> untuk membaca sambutan, petunjuk singkat, lalu membuka login atau registrasi.</p></div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-right-to-bracket"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 2</span><h2>Login</h2><p>Pada tahap Masuk/Daftar, pilih <strong>Masuk</strong>, lalu isi email atau username dan kata sandi. Kader memakai ID akun yang diberikan pengelola; orang tua dan ibu hamil memakai akun masing-masing.</p></div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-user-plus"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 3</span><h2>Registrasi pengguna baru</h2><p>Pilih <strong>Daftar Baru</strong>, lalu pilih Ibu Hamil atau Orang Tua Balita. Kader tidak mendaftar mandiri; akun kader disiapkan pengelola. Masukkan nama, email, kata sandi, dan konfirmasinya.</p></div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-clipboard-list"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 4</span><h2>Isi biodata sesuai akun</h2><p>Formulir menampilkan kolom sesuai pilihan. Ibu Hamil mengisi pendamping, usia, dan usia kandungan. Orang Tua Balita mengisi data orang tua dan balita, termasuk tanggal lahir. Lengkapi alamat, RT, RW, dan dusun.</p></div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-chart-pie"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 5</span><h2>Gunakan dashboard</h2>
+        {% if session.get('user_role') == 'Kader' %}<p>Dashboard Posyandu merangkum peserta, pemeriksaan, dan indikator layanan.</p><a class="guide-action" href="{{ url_for('kader_dashboard') }}">Buka dashboard <i class="fas fa-arrow-right"></i></a>
+        {% elif session.get('user_role') == 'Orang Tua Balita' %}<p>Dashboard Tumbuh Kembang menampilkan balita yang terhubung, hasil ukur, dan perkembangan.</p><a class="guide-action" href="{{ url_for('ortu_dashboard') }}">Buka dashboard <i class="fas fa-arrow-right"></i></a>
+        {% else %}<p>Dashboard Kehamilan menampilkan informasi kehamilan dan pemeriksaan yang tercatat.</p><a class="guide-action" href="{{ url_for('ibu_dashboard') }}">Buka dashboard <i class="fas fa-arrow-right"></i></a>{% endif %}
+      </div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-compass"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 6</span><h2>Buka fitur yang dibutuhkan</h2>
+        {% if session.get('user_role') == 'Kader' %}<p>Gunakan Data Peserta untuk mencari atau mendaftarkan peserta, Kalender untuk jadwal, dan Pusat Edukasi untuk materi kesehatan.</p><a class="guide-action" href="{{ url_for('peserta_list') }}">Buka data peserta <i class="fas fa-arrow-right"></i></a>
+        {% elif session.get('user_role') == 'Orang Tua Balita' %}<p>Buka edukasi untuk membaca materi gizi dan MP-ASI. Kalender menampilkan jadwal kunjungan yang tercatat.</p><a class="guide-action" href="{{ url_for('edukasi_view') }}">Buka edukasi <i class="fas fa-arrow-right"></i></a>
+        {% else %}<p>Buka Buku KIA dan edukasi untuk mempelajari informasi kehamilan. Kalender menampilkan jadwal kunjungan yang tercatat.</p><a class="guide-action" href="{{ url_for('ibu_dashboard') }}">Buka Buku KIA <i class="fas fa-arrow-right"></i></a>{% endif %}
+      </div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-stethoscope"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 7</span><h2>Catat pemeriksaan</h2>
+        {% if session.get('user_role') == 'Kader' %}<p>Pilih menu pemeriksaan balita atau ibu hamil, pilih peserta, isi hasil ukur dan catatan, lalu simpan. Masukkan jadwal berikutnya agar muncul di kalender.</p><div class="guide-actions"><a class="guide-action" href="{{ url_for('pemeriksaan_balita_view') }}">Pemeriksaan balita <i class="fas fa-arrow-right"></i></a><a class="guide-action" href="{{ url_for('pemeriksaan_ibu_view') }}">Pemeriksaan ibu hamil <i class="fas fa-arrow-right"></i></a></div>
+        {% else %}<p>Pencatatan dilakukan kader Posyandu. Setelah data disimpan, hasil pemeriksaan akan tampil di dashboard dan riwayat akun yang terkait.</p>{% endif %}
+      </div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-file-lines"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 8</span><h2>Lihat dan buat laporan</h2>
+        {% if session.get('user_role') == 'Kader' %}<p>Buka Laporan Posyandu, pilih periode, tinjau rekap tabel dan grafik, lalu simpan arsip atau ekspor ke PDF/Excel.</p><a class="guide-action" href="{{ url_for('laporan_view') }}">Buka laporan <i class="fas fa-arrow-right"></i></a>
+        {% else %}<p>Laporan rekap dibuat dan dikelola kader. Informasi pemeriksaan pribadi dapat dilihat melalui dashboard dan riwayat.</p>{% endif %}
+      </div>
+    </li>
+    <li class="guide-step card">
+      <span class="guide-step-icon"><i class="fas fa-clock-rotate-left"></i></span>
+      <div class="guide-step-copy"><span class="guide-step-label">Langkah 9</span><h2>Periksa riwayat dan jadwal</h2>
+        {% if session.get('user_role') == 'Kader' %}<p>Buka Data Peserta untuk meninjau riwayat. Kalender menampilkan jadwal kunjungan berikutnya yang tersimpan di pemeriksaan.</p>
+        {% elif session.get('user_role') == 'Orang Tua Balita' %}<p>Lihat riwayat penimbangan, hasil pengukuran, dan perkembangan balita di dashboard. Kalender menampilkan jadwal kunjungan berikutnya.</p>
+        {% else %}<p>Lihat riwayat ANC dan hasil pemeriksaan di dashboard/Buku KIA. Kalender menampilkan jadwal kunjungan berikutnya.</p>{% endif %}
+        <a class="guide-action" href="{{ url_for('kegiatan_view') }}">Buka kalender <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </li>
+  </ol>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .guide-page { display:grid; gap:22px; max-width:900px; margin:0 auto; }
+  .guide-hero { display:flex; align-items:center; gap:18px; padding:24px; }
+  .guide-icon { display:grid; place-items:center; width:54px; height:54px; flex:0 0 auto; border-radius:16px; background:var(--beige); color:var(--dark-brown); font-size:1.35rem; }
+  .guide-hero h1 { margin:4px 0; color:var(--dark-brown); font-size:1.55rem; }
+  .guide-hero p:last-child { color:var(--text-secondary); font-size:.88rem; line-height:1.55; }
+  .eyebrow { color:var(--mocha); font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+  .guide-steps { position:relative; display:grid; gap:12px; margin:0; padding:0; list-style:none; }
+  .guide-steps::before { content:""; position:absolute; top:35px; bottom:35px; left:34px; width:2px; background:var(--border-light); }
+  .guide-step { position:relative; display:grid; grid-template-columns:52px minmax(0,1fr); align-items:start; gap:16px; padding:20px; }
+  .guide-step-icon { z-index:1; display:grid; place-items:center; width:48px; height:48px; border:1px solid var(--border-light); border-radius:15px; background:var(--card-subtle); color:var(--mocha-dark); font-size:1.05rem; }
+  .guide-step-copy { min-width:0; }
+  .guide-step-label { color:var(--mocha); font-size:.7rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+  .guide-step h2 { margin:3px 0 6px; color:var(--dark-brown); font-size:1rem; }
+  .guide-step p { margin:0; color:var(--text-secondary); font-size:.85rem; line-height:1.6; }
+  .guide-actions { display:flex; flex-wrap:wrap; gap:8px 20px; }
+  .guide-action { display:inline-flex; align-items:center; gap:7px; margin-top:9px; color:var(--mocha-dark); font-size:.8rem; font-weight:800; text-decoration:none; }
+  .guide-action:hover { text-decoration:underline; }
+  @media(max-width:600px) {
+    .guide-hero { align-items:flex-start; padding:18px; }
+    .guide-hero h1 { font-size:1.3rem; }
+    .guide-step { grid-template-columns:40px minmax(0,1fr); gap:12px; padding:15px; }
+    .guide-steps::before { left:35px; }
+    .guide-step-icon { width:40px; height:40px; border-radius:12px; font-size:.9rem; }
+  }
+</style>
+{% endblock %}

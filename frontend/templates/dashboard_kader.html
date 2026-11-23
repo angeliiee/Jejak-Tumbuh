@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Posyandu — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<!-- Hero Welcome Banner -->
+<div class="hero-card">
+  <div class="hero-text">
+    <h2>Halo, {{ session.get('user_name', 'Kader Posyandu') }} 👋</h2>
+    <p>Selamat datang di sistem manajemen dan pencatatan Posyandu Digital. Pantau kesehatan balita dan ibu hamil secara komprehensif.</p>
+  </div>
+  <div class="hero-actions">
+    <a href="{{ url_for('pemeriksaan_balita_view') }}" class="btn btn-primary">
+      <i class="fas fa-plus-circle"></i>
+      <span>Catat Balita</span>
+    </a>
+    <a href="{{ url_for('pemeriksaan_ibu_view') }}" class="btn btn-secondary">
+      <i class="fas fa-notes-medical"></i>
+      <span>Catat Ibu Hamil</span>
+    </a>
+  </div>
+</div>
+
+<!-- Period Filter Form -->
+<div class="card" style="padding: 16px 24px; margin-bottom: 22px;">
+  <form method="GET" action="{{ url_for('kader_dashboard') }}" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-filter" style="color: var(--mocha);"></i>
+      <span style="font-weight: 700; font-size: 0.9rem; color: var(--dark-brown);">Filter Periode Analisis:</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <select name="bulan" class="form-select" style="width: 150px; padding: 7px 12px;">
+        <option value="">Semua Bulan</option>
+        {% for b_num, b_name in bulan_options %}
+          <option value="{{ b_num }}" {% if selected_bulan == b_num %}selected{% endif %}>{{ b_name }}</option>
+        {% endfor %}
+      </select>
+      <select name="tahun" class="form-select" style="width: 120px; padding: 7px 12px;">
+        <option value="">Semua Tahun</option>
+        {% for yr in tahun_options %}
+          <option value="{{ yr }}" {% if selected_tahun == yr %}selected{% endif %}>{{ yr }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+      <a href="{{ url_for('kader_dashboard') }}" class="btn btn-secondary btn-sm">Reset</a>
+    </div>
+  </form>
+</div>
+
+<!-- Summary Metric Cards -->
+<div class="stats-grid">
+  <!-- Total Balita -->
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Total Peserta Balita</div>
+      <div class="stat-value">{{ metrics.total_balita }}</div>
+      <div class="stat-desc"><i class="fas fa-child"></i> Terdaftar di Posyandu</div>
+    </div>
+    <div class="stat-icon mocha">
+      <i class="fas fa-baby"></i>
+    </div>
+  </div>
+
+  <!-- Total Ibu Hamil -->
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Total Ibu Hamil</div>
+      <div class="stat-value">{{ metrics.total_ibu }}</div>
+      <div class="stat-desc"><i class="fas fa-female"></i> Terdaftar aktif</div>
+    </div>
+    <div class="stat-icon green">
+      <i class="fas fa-person-pregnant"></i>
+    </div>
+  </div>
+
+  <!-- Pemeriksaan Balita Periode Ini -->
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Pemeriksaan Balita</div>
+      <div class="stat-value">{{ metrics.pemeriksaan_balita_count }}</div>
+      <div class="stat-desc"><i class="fas fa-weight-scale"></i> Riwayat penimbangan</div>
+    </div>
+    <div class="stat-icon blue">
+      <i class="fas fa-stethoscope"></i>
+    </div>
+  </div>
+
+  <!-- Stunting / Gizi Perlu Pantau -->
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Perlu Intervensi</div>
+      <div class="stat-value" style="color: var(--red);">{{ metrics.balita_stunting_count + metrics.ibu_risiko_tinggi_count }}</div>
+      <div class="stat-desc"><i class="fas fa-triangle-exclamation"></i> {{ metrics.balita_stunting_count }} Stunting | {{ metrics.ibu_risiko_tinggi_count }} Risiko Ibu</div>
+    </div>
+    <div class="stat-icon red">
+      <i class="fas fa-heart-pulse"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Charts Grid (AutoEDA Style) -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 24px; margin-bottom: 28px;">
+  <!-- Chart 1: Status Gizi Balita (WHO) -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">
+          <i class="fas fa-chart-pie"></i>
+          <span>Distribusi Status Gizi Balita (WHO)</span>
+        </div>
+        <div class="card-subtitle">Berdasarkan data pemeriksaan yang terpilih</div>
+      </div>
+    </div>
+    <div id="chartGiziBalita" style="width: 100%; height: 320px;"></div>
+  </div>
+
+  <!-- Chart 2: Skrining Risiko Ibu Hamil -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">
+          <i class="fas fa-chart-bar"></i>
+          <span>Tingkat Risiko Ibu Hamil (Kemenkes)</span>
+        </div>
+        <div class="card-subtitle">Klasifikasi risiko maternal berdasarkan pemeriksaan ANC</div>
+      </div>
+    </div>
+    <div id="chartRisikoIbu" style="width: 100%; height: 320px;"></div>
+  </div>
+</div>
+
+<!-- Recent Examination Table -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span>Pemeriksaan Balita Terbaru</span>
+      </div>
+      <div class="card-subtitle">Pencatatan antropometri dan hasil Z-Score terkini</div>
+    </div>
+    <a href="{{ url_for('pemeriksaan_balita_view') }}" class="btn btn-outline btn-sm">Lihat Semua Data &rarr;</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Nama Balita</th>
+          <th>Usia (Bln)</th>
+          <th>BB (kg)</th>
+          <th>TB (cm)</th>
+          <th>Z-Score BB/U</th>
+          <th>Z-Score TB/U</th>
+          <th>Status Gizi</th>
+          <th>Dusun</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in recent_balita %}
+        <tr>
+          <td><strong>{{ b.tanggal_str }}</strong></td>
+          <td>{{ b.nama or b.id_peserta }}</td>
+          <td>{{ b.usia_bulan }}</td>
+          <td>{{ b.berat_kg }} kg</td>
+          <td>{{ b.tinggi_cm }} cm</td>
+          <td><code>{{ b.z_bb_u }}</code></td>
+          <td><code>{{ b.z_tb_u }}</code></td>
+          <td>
+            {% if 'Stunting' in b.status_gizi or 'Sangat' in b.status_gizi %}
+              <span class="badge badge-red">{{ b.status_gizi }}</span>
+            {% elif 'kurang' in b.status_gizi.lower() %}
+              <span class="badge badge-amber">{{ b.status_gizi }}</span>
+            {% elif 'lebih' in b.status_gizi.lower() %}
+              <span class="badge badge-amber">{{ b.status_gizi }}</span>
+            {% else %}
+              <span class="badge badge-green">{{ b.status_gizi }}</span>
+            {% endif %}
+          </td>
+          <td>{{ b.alamat_dusun or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 30px;">
+            Belum ada riwayat pemeriksaan pada periode ini.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Plotly Chart 1: Donut Chart Status Gizi Balita
+  var giziLabels = {{ chart_gizi_labels | tojson }};
+  var giziValues = {{ chart_gizi_values | tojson }};
+
+  var dataGizi = [{
+    values: giziValues,
+    labels: giziLabels,
+    type: 'pie',
+    hole: 0.5,
+    marker: {
+      colors: ['#2E7D32', '#D97706', '#C0392B', '#8C715E', '#A68A76']
+    },
+    textinfo: 'label+percent',
+    hoverinfo: 'label+value+percent'
+  }];
+
+  var layoutGizi = {
+    font: { family: 'Plus Jakarta Sans', size: 12, color: '#46372E' },
+    margin: { t: 20, b: 20, l: 20, r: 20 },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    showlegend: true,
+    legend: { orientation: 'h', y: -0.15 }
+  };
+
+  Plotly.newPlot('chartGiziBalita', dataGizi, layoutGizi, { responsive: true, displayModeBar: false });
+
+  // Plotly Chart 2: Bar Chart Risiko Ibu Hamil
+  var risikoLabels = {{ chart_risiko_labels | tojson }};
+  var risikoValues = {{ chart_risiko_values | tojson }};
+
+  var dataRisiko = [{
+    x: risikoLabels,
+    y: risikoValues,
+    type: 'bar',
+    marker: {
+      color: ['#2E7D32', '#D97706', '#C0392B'],
+      line: { color: '#E8DCCB', width: 1.5 }
+    }
+  }];
+
+  var layoutRisiko = {
+    font: { family: 'Plus Jakarta Sans', size: 12, color: '#46372E' },
+    margin: { t: 20, b: 40, l: 40, r: 20 },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    yaxis: { gridcolor: '#E8DCCB' },
+    xaxis: { gridcolor: 'transparent' }
+  };
+
+  Plotly.newPlot('chartRisikoIbu', dataRisiko, layoutRisiko, { responsive: true, displayModeBar: false });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Pemeriksaan Ibu Hamil — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<div class="card-header" style="margin-bottom: 24px; border-bottom: none; padding-bottom: 0;">
+  <div>
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--dark-brown);">🤰 Pencatatan Pemeriksaan Ibu Hamil</h2>
+    <p style="color: var(--text-secondary); margin-top: 4px;">Pemeriksaan Ante Natal Care (ANC), pemantauan faktor risiko maternal, LILA (KEK), anemia, dan tekanan darah.</p>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; margin-bottom: 30px;">
+  <!-- Form Entry Pemeriksaan Ibu Hamil -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom: 18px;">
+      <i class="fas fa-edit"></i>
+      <span>Formulir Pemeriksaan ANC Baru</span>
+    </div>
+
+    <form method="POST" action="{{ url_for('simpan_pemeriksaan_ibu') }}" id="formIbu">
+      <!-- Pilih Ibu Hamil -->
+      <div class="form-group">
+        <label class="form-label" for="selectIbu">Pilih Ibu Hamil Terdaftar *</label>
+        <select class="form-select" id="selectIbu" name="id_peserta" required onchange="onSelectIbu(this)">
+          <option value="">-- Pilih Ibu Hamil --</option>
+          {% for i in ibu_options %}
+            <option value="{{ i.id_peserta }}" data-nama="{{ i.nama }}" data-usia="{{ i.usia_kehamilan_minggu }}" data-dusun="{{ i.alamat_dusun }}" data-umur="{{ i.usia_ibu_tahun }}">
+              {{ i.id_peserta }} — {{ i.nama }} (Usia {{ i.usia_ibu_tahun }} th, Usia Hamil {{ i.usia_kehamilan_minggu }} mgg)
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Info Ibu Terpilih -->
+      <div id="infoIbuBox" style="display: none; background: var(--card-subtle); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+          <span><strong>Dusun:</strong> <span id="infoIbuDusun">-</span></span>
+          <span><strong>Usia Ibu:</strong> <span id="infoIbuUmur">-</span> tahun</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tanggal Pemeriksaan *</label>
+          <input type="date" class="form-control" name="tanggal_pemeriksaan" value="{{ today_iso }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Usia Kehamilan (Minggu) *</label>
+          <input type="number" class="form-control" id="inputMinggu" name="usia_kehamilan_minggu" placeholder="contoh: 24" required min="1" max="44">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Berat Badan Ibu (kg) *</label>
+          <input type="number" step="0.1" class="form-control" name="berat_kg" placeholder="contoh: 58.5" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lingkar Lengan Atas / LILA (cm) *</label>
+          <input type="number" step="0.1" class="form-control" id="inputLila" name="lila_cm" placeholder="contoh: 24.5" required oninput="calculateLiveMaternalRisk()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tekanan Darah Sistol (mmHg) *</label>
+          <input type="number" class="form-control" id="inputSistol" name="sistol" placeholder="contoh: 110" required oninput="calculateLiveMaternalRisk()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tekanan Darah Diastol (mmHg) *</label>
+          <input type="number" class="form-control" id="inputDiastol" name="diastol" placeholder="contoh: 75" required oninput="calculateLiveMaternalRisk()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kadar Hemoglobin Hb (g/dL) *</label>
+          <input type="number" step="0.1" class="form-control" id="inputHb" name="hb_gdl" placeholder="contoh: 11.5" required oninput="calculateLiveMaternalRisk()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tinggi Fundus Uteri / TFU (cm)</label>
+          <input type="number" step="0.1" class="form-control" name="tfu_cm" placeholder="contoh: 22.0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Denyut Jantung Janin / DJJ (bpm)</label>
+          <input type="number" class="form-control" name="djj_bpm" placeholder="contoh: 140">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pemberian Tablet Tambah Darah (Fe)</label>
+          <select class="form-select" name="tablet_fe">
+            <option value="Diberikan">Diberikan</option>
+            <option value="Belum diberikan">Belum diberikan</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Catatan Pemeriksaan / Rujukan</label>
+        <textarea class="form-control" name="catatan" rows="2" placeholder="Catatan kondisi ibu hamil, keluhan, rekomendasi kontrol..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+        <i class="fas fa-save"></i>
+        <span>Simpan Pemeriksaan Ibu Hamil</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Live Maternal Risk Calculation Box -->
+  <div>
+    <div class="card" style="position: sticky; top: 90px;">
+      <div class="card-title" style="margin-bottom: 14px;">
+        <i class="fas fa-shield-heart" style="color: var(--mocha);"></i>
+        <span>Skrining Risiko Maternal Kemenkes RI</span>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">
+        Evaluasi otomatis faktor risiko Kurang Energi Kronis (KEK), anemia gestasional, dan preeklamsia/hipertensi.
+      </p>
+
+      <div class="calc-preview-box">
+        <div class="calc-item">
+          <div class="label">Status KEK</div>
+          <div class="val" id="previewKEK">-</div>
+          <small id="badgeKEK" class="badge badge-mocha" style="margin-top: 4px;">LILA &lt; 23.5 cm</small>
+        </div>
+        <div class="calc-item">
+          <div class="label">Status Anemia</div>
+          <div class="val" id="previewAnemia">-</div>
+          <small id="badgeAnemia" class="badge badge-mocha" style="margin-top: 4px;">Hb &lt; 11.0 g/dL</small>
+        </div>
+        <div class="calc-item">
+          <div class="label">Hipertensi</div>
+          <div class="val" id="previewHipertensi">-</div>
+          <small id="badgeHipertensi" class="badge badge-mocha" style="margin-top: 4px;">&ge; 140/90 mmHg</small>
+        </div>
+      </div>
+
+      <div style="background: var(--card-subtle); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+        <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+          Tingkat Risiko Kehamilan
+        </div>
+        <div id="previewRisiko" style="font-size: 1.3rem; font-weight: 800; color: var(--dark-brown);">
+          Risiko Rendah
+        </div>
+        <div id="previewRekomendasiIbu" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">
+          Kondisi ibu dalam batas normal. Lanjutkan kontrol rutin setiap bulan.
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+        <i class="fas fa-stethoscope"></i> Rekomendasi: Jika berstatus <strong>Risiko Tinggi</strong>, segera jadwalkan rujukan ke Puskesmas atau Dokter Spesialis Obgyn.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Riwayat Pemeriksaan Ibu Hamil -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">
+        <i class="fas fa-list-check"></i>
+        <span>Riwayat Seluruh Pemeriksaan Ibu Hamil</span>
+      </div>
+      <div class="card-subtitle">Menampilkan {{ riwayat_ibu | length }} riwayat pemeriksaan ANC</div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>ID & Nama Ibu</th>
+          <th>Usia Hamil</th>
+          <th>BB (kg)</th>
+          <th>LILA (cm)</th>
+          <th>Tensi (TD)</th>
+          <th>Hb (g/dL)</th>
+          <th>Status KEK</th>
+          <th>Status Anemia</th>
+          <th>Tingkat Risiko</th>
+          <th>Tablet Fe</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in riwayat_ibu %}
+        <tr>
+          <td><strong>{{ r.tanggal_str }}</strong></td>
+          <td><strong>{{ r.nama or r.id_peserta }}</strong></td>
+          <td>{{ r.usia_kehamilan_minggu }} mgg</td>
+          <td>{{ r.berat_kg }} kg</td>
+          <td>{{ r.lila_cm }} cm</td>
+          <td><code>{{ r.sistol }}/{{ r.diastol }}</code></td>
+          <td>{{ r.hb_gdl }} g/dL</td>
+          <td>
+            {% if r.status_kek == 'KEK' %}
+              <span class="badge badge-red">KEK</span>
+            {% else %}
+              <span class="badge badge-green">Normal</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.status_anemia == 'Anemia' %}
+              <span class="badge badge-amber">Anemia</span>
+            {% else %}
+              <span class="badge badge-green">Normal</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.risiko == 'Risiko tinggi' %}
+              <span class="badge badge-red">{{ r.risiko }}</span>
+            {% elif r.risiko == 'Perlu pemantauan' %}
+              <span class="badge badge-amber">{{ r.risiko }}</span>
+            {% else %}
+              <span class="badge badge-green">{{ r.risiko }}</span>
+            {% endif %}
+          </td>
+          <td>{{ r.tablet_fe or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function onSelectIbu(select) {
+  var opt = select.options[select.selectedIndex];
+  if (!opt.value) {
+    document.getElementById('infoIbuBox').style.display = 'none';
+    return;
+  }
+  document.getElementById('infoIbuBox').style.display = 'block';
+  document.getElementById('infoIbuDusun').textContent = opt.getAttribute('data-dusun') || '-';
+  document.getElementById('infoIbuUmur').textContent = opt.getAttribute('data-umur') || '-';
+
+  var usiaHamil = opt.getAttribute('data-usia');
+  if (usiaHamil) {
+    document.getElementById('inputMinggu').value = usiaHamil;
+  }
+  calculateLiveMaternalRisk();
+}
+
+function calculateLiveMaternalRisk() {
+  var lila = parseFloat(document.getElementById('inputLila').value);
+  var sistol = parseInt(document.getElementById('inputSistol').value);
+  var diastol = parseInt(document.getElementById('inputDiastol').value);
+  var hb = parseFloat(document.getElementById('inputHb').value);
+
+  var isKek = !isNaN(lila) && lila < 23.5;
+  var isAnemia = !isNaN(hb) && hb < 11.0;
+  var isHipertensi = (!isNaN(sistol) && sistol >= 140) || (!isNaN(diastol) && diastol >= 90);
+
+  if (!isNaN(lila)) {
+    document.getElementById('previewKEK').textContent = isKek ? "KEK" : "Normal";
+    var bKek = document.getElementById('badgeKEK');
+    bKek.className = "badge " + (isKek ? "badge-red" : "badge-green");
+    bKek.textContent = isKek ? "Risiko KEK" : "Aman";
+  }
+
+  if (!isNaN(hb)) {
+    document.getElementById('previewAnemia').textContent = isAnemia ? "Anemia" : "Normal";
+    var bAn = document.getElementById('badgeAnemia');
+    bAn.className = "badge " + (isAnemia ? "badge-amber" : "badge-green");
+    bAn.textContent = isAnemia ? "Kurang Hb" : "Aman";
+  }
+
+  if (!isNaN(sistol) && !isNaN(diastol)) {
+    document.getElementById('previewHipertensi').textContent = isHipertensi ? "Hipertensi" : "Normal";
+    var bHip = document.getElementById('badgeHipertensi');
+    bHip.className = "badge " + (isHipertensi ? "badge-red" : "badge-green");
+    bHip.textContent = isHipertensi ? "Tekanan Tinggi" : "Aman";
+  }
+
+  // Combined Risk
+  var countFactors = (isKek ? 1 : 0) + (isAnemia ? 1 : 0) + (isHipertensi ? 1 : 0);
+  var risk = "Risiko Rendah";
+  var reco = "Kondisi ibu dalam batas normal. Lanjutkan konsumsi makanan gizi seimbang dan tablet Fe.";
+
+  if (isHipertensi || (!isNaN(hb) && hb < 8.0) || countFactors >= 2) {
+    risk = "Risiko Tinggi";
+    reco = "Ditemukan faktor risiko signifikan! Segera lakukan rujukan ke Bidan Desa atau Puskesmas.";
+  } else if (countFactors === 1) {
+    risk = "Perlu Pemantauan";
+    reco = "Perlu perhatian khusus pada asupan nutrisi/tekanan darah. Jadwalkan kontrol lebih intensif.";
+  }
+
+  var elRisiko = document.getElementById('previewRisiko');
+  elRisiko.textContent = risk;
+  if (risk === "Risiko Tinggi") {
+    elRisiko.style.color = "var(--red)";
+  } else if (risk === "Perlu Pemantauan") {
+    elRisiko.style.color = "var(--amber)";
+  } else {
+    elRisiko.style.color = "var(--green)";
+  }
+
+  document.getElementById('previewRekomendasiIbu').textContent = reco;
+}
+</script>
+{% endblock %}

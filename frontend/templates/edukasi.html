@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Pusat Edukasi Posyandu — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<div class="card-header" style="margin-bottom: 24px; border-bottom: none; padding-bottom: 0;">
+  <div>
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--dark-brown);">📚 Pusat Edukasi Kesehatan & Gizi</h2>
+    <p style="color: var(--text-secondary); margin-top: 4px;">Panduan praktis nutrisi balita, pencegahan stunting, jadwal imunisasi, dan perawatan kehamilan sehat.</p>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+  <!-- Card 1: Pencegahan Stunting -->
+  <div class="card">
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">
+      <i class="fas fa-seedling"></i>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 8px;">
+      Pencegahan Stunting (1.000 HPK)
+    </h3>
+    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      1.000 Hari Pertama Kehidupan (sejak janin hingga usia 2 tahun) adalah periode emas pertumbuhan otak dan organ vital.
+    </p>
+    <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+      <li>ASI Eksklusif selama 6 bulan pertama tanpa tambahan makanan.</li>
+      <li>Berikan MP-ASI kaya protein hewani (telur, ikan, daging) mulai usia 6 bulan.</li>
+      <li>Rutin timbang dan ukur panjang badan setiap bulan di Posyandu.</li>
+      <li>Jaga kebersihan air minum dan sanitasi lingkungan rumah tangga.</li>
+    </ul>
+  </div>
+
+  <!-- Card 2: Panduan MP-ASI -->
+  <div class="card">
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--amber-light); color: var(--amber); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">
+      <i class="fas fa-bowl-food"></i>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 8px;">
+      Tahapan MP-ASI Berkelanjutan
+    </h3>
+    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      Tekstur, frekuensi, dan porsi makanan pendamping ASI harus disesuaikan secara bertahap sesuai usia anak.
+    </p>
+    <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+      <li><strong>Usia 6–8 Bulan:</strong> Puree / bubur saring lembut, 2–3 kali sehari, 2–3 sendok makan bertahap hingga 1/2 mangkok.</li>
+      <li><strong>Usia 9–11 Bulan:</strong> Makanan cincang halus (minced) / finger food, 3–4 kali sehari, 1/2 mangkok.</li>
+      <li><strong>Usia 12–23 Bulan:</strong> Makanan keluarga bertekstur, 3–4 kali makan utama + 1–2 kali selingan sehat.</li>
+    </ul>
+  </div>
+
+  <!-- Card 3: Imunisasi Lengkap -->
+  <div class="card">
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--blue-light); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">
+      <i class="fas fa-syringe"></i>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 8px;">
+      Jadwal Imunisasi Dasar Balita
+    </h3>
+    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      Imunisasi memberikan perlindungan antibodi spesifik terhadap penyakit berbahaya seperti polio, campak, dan difteri.
+    </p>
+    <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+      <li><strong>0 Bulan:</strong> Hepatitis B0 (HB0).</li>
+      <li><strong>1 Bulan:</strong> BCG dan Polio 1.</li>
+      <li><strong>2 Bulan:</strong> DPT-HB-Hib 1, Polio 2, PCV 1, Rotavirus 1.</li>
+      <li><strong>3 Bulan:</strong> DPT-HB-Hib 2, Polio 3, PCV 2, Rotavirus 2.</li>
+      <li><strong>4 Bulan:</strong> DPT-HB-Hib 3, Polio 4, IPV 1, Rotavirus 3.</li>
+      <li><strong>9 Bulan:</strong> Campak-Rubella (MR) dan IPV 2.</li>
+    </ul>
+  </div>
+
+  <!-- Card 4: Gizi Ibu Hamil -->
+  <div class="card">
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--primary-light); color: var(--mocha-dark); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">
+      <i class="fas fa-person-pregnant"></i>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 8px;">
+      Nutrisi Esensial Ibu Hamil
+    </h3>
+    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      Pemenuhan mikronutrien ibu hamil mencegah bayi lahir dengan Berat Badan Lahir Rendah (BBLR) dan risiko KEK.
+    </p>
+    <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+      <li>Minum minimal 90 tablet tambah darah (Fe) selama masa kehamilan.</li>
+      <li>Konsumsi makanan kaya asam folat (bayam, brokoli, kacang-kacangan, telur).</li>
+      <li>Pastikan kenaikan berat badan ibu bertahap sesuai IMT pra-kehamilan.</li>
+      <li>Cukupi asupan kalsium dari susu, tahu, tempe, dan ikan teri untuk tulang janin.</li>
+    </ul>
+  </div>
+
+  <!-- Card 5: Tanda Bahaya Kehamilan -->
+  <div class="card">
+    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--red-light); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">
+      <i class="fas fa-triangle-exclamation"></i>
+    </div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 8px;">
+      Tanda Bahaya Kehamilan Segera Rujuk
+    </h3>
+    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">
+      Jika mengalami salah satu tanda berikut, segera periksakan ke Bidan Desa, Puskesmas, atau Rumah Sakit terdekat:
+    </p>
+    <ul style="font-size: 0.82rem; color: var(--text-secondary); padding-left: 18px; line-height: 1.7;">
+      <li>Perdarahan pada jalan lahir (sedikit maupun banyak).</li>
+      <li>Bengkak pada kaki, tangan, dan wajah disertai pusing hebat atau pandangan kabur.</li>
+      <li>Demam tinggi atau menggigil.</li>
+      <li>Air ketuban keluar sebelum waktunya.</li>
+      <li>Gerakan janin berkurang atau tidak terasa sama sekali.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

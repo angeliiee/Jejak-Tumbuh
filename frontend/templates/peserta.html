@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Data Peserta — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<div class="card-header" style="margin-bottom: 24px; border-bottom: none; padding-bottom: 0;">
+  <div>
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--dark-brown);">👥 Manajemen Data Peserta Posyandu</h2>
+    <p style="color: var(--text-secondary); margin-top: 4px;">Kelola biodata balita dan ibu hamil yang terdaftar di wilayah kerja Posyandu.</p>
+  </div>
+  <div>
+    <button class="btn btn-primary" onclick="toggleFormPeserta()">
+      <i class="fas fa-user-plus"></i>
+      <span>+ Daftarkan Peserta Baru</span>
+    </button>
+  </div>
+</div>
+
+<!-- Form Tambah Peserta Baru (Collapsible) -->
+<div class="card" id="cardTambahPeserta" style="display: none; border-color: var(--mocha); box-shadow: var(--shadow-md);">
+  <div class="card-title" style="margin-bottom: 18px;">
+    <i class="fas fa-user-plus" style="color: var(--mocha);"></i>
+    <span>Formulir Pendaftaran Peserta Baru</span>
+  </div>
+
+  <form method="POST" action="{{ url_for('tambah_peserta_baru') }}">
+    <div class="form-group">
+      <label class="form-label">Jenis Peserta *</label>
+      <select class="form-select" name="jenis_peserta" id="selectJenisPeserta" required onchange="toggleFormFields(this.value)">
+        <option value="Balita">Anak Balita</option>
+        <option value="Ibu Hamil">Ibu Hamil</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap Peserta *</label>
+        <input type="text" class="form-control" name="nama" placeholder="contoh: Muhammad Rizki" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Wilayah Dusun *</label>
+        <select class="form-select" name="alamat_dusun" required>
+          <option value="Melati">Dusun Melati</option>
+          <option value="Mawar">Dusun Mawar</option>
+          <option value="Kenanga">Dusun Kenanga</option>
+          <option value="Anggrek">Dusun Anggrek</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Khusus Balita -->
+    <div id="fieldsBalita">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Jenis Kelamin *</label>
+          <select class="form-select" name="jenis_kelamin">
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Lahir *</label>
+          <input type="date" class="form-control" name="tanggal_lahir" value="{{ today_iso }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Usia (Bulan) *</label>
+          <input type="number" step="0.1" class="form-control" name="usia_bulan" placeholder="contoh: 12">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Orang Tua / Wali *</label>
+        <input type="text" class="form-control" name="nama_orang_tua" placeholder="contoh: Ibu Dewi Kusuma">
+      </div>
+    </div>
+
+    <!-- Khusus Ibu Hamil -->
+    <div id="fieldsIbuHamil" style="display: none;">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Usia Ibu (Tahun) *</label>
+          <input type="number" class="form-control" name="usia_ibu_tahun" placeholder="contoh: 28">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Usia Kehamilan Saat Ini (Minggu) *</label>
+          <input type="number" class="form-control" name="usia_kehamilan_minggu" placeholder="contoh: 16">
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 14px;">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-check"></i> Simpan Data Peserta
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="toggleFormPeserta()">
+        Batal
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Tabel Daftar Peserta -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <i class="fas fa-address-book"></i>
+      <span>Daftar Peserta Terdaftar ({{ peserta_list | length }} Peserta)</span>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <input type="text" id="filterPesertaInput" class="form-control" style="width: 240px; padding: 6px 12px; font-size: 0.82rem;" placeholder="Cari nama atau ID..." onkeyup="filterPesertaTable()">
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="modern-table" id="tablePeserta">
+      <thead>
+        <tr>
+          <th>ID Peserta</th>
+          <th>Nama Peserta</th>
+          <th>Jenis</th>
+          <th>Detail Usia</th>
+          <th>Jenis Kelamin</th>
+          <th>Orang Tua / Kontak</th>
+          <th>Dusun</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in peserta_list %}
+        <tr>
+          <td><code>{{ p.id_peserta }}</code></td>
+          <td><strong>{{ p.nama }}</strong></td>
+          <td>
+            {% if p.jenis_peserta == 'Balita' %}
+              <span class="badge badge-mocha"><i class="fas fa-baby"></i> Balita</span>
+            {% else %}
+              <span class="badge badge-green"><i class="fas fa-female"></i> Ibu Hamil</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.jenis_peserta == 'Balita' %}
+              {{ p.usia_bulan }} bulan
+            {% else %}
+              {{ p.usia_kehamilan_minggu }} mgg (Usia {{ p.usia_ibu_tahun }} th)
+            {% endif %}
+          </td>
+          <td>{{ p.jenis_kelamin or '-' }}</td>
+          <td>{{ p.nama_orang_tua or p.email or '-' }}</td>
+          <td>{{ p.alamat_dusun or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleFormPeserta() {
+  var card = document.getElementById('cardTambahPeserta');
+  if (card.style.display === 'none') {
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function toggleFormFields(jenis) {
+  var fBalita = document.getElementById('fieldsBalita');
+  var fIbu = document.getElementById('fieldsIbuHamil');
+  if (jenis === 'Balita') {
+    fBalita.style.display = 'block';
+    fIbu.style.display = 'none';
+  } else {
+    fBalita.style.display = 'none';
+    fIbu.style.display = 'block';
+  }
+}
+
+function filterPesertaTable() {
+  var input = document.getElementById('filterPesertaInput').value.toLowerCase();
+  var table = document.getElementById('tablePeserta');
+  var trs = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (var i = 0; i < trs.length; i++) {
+    var text = trs[i].textContent.toLowerCase();
+    if (text.indexOf(input) > -1) {
+      trs[i].style.display = '';
+    } else {
+      trs[i].style.display = 'none';
+    }
+  }
+}
+</script>
+{% endblock %}

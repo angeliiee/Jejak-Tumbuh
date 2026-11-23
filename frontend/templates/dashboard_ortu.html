@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Tumbuh Kembang Balita — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<div class="hero-card">
+  <div class="hero-text">
+    <h2>Halo, {{ session.get('user_name', 'Bunda / Ayah') }} 👶</h2>
+    <p>Pantau tumbuh kembang dan grafik kesehatan buah hati Anda secara berkala sesuai standar antropometri WHO dan Kemenkes RI.</p>
+  </div>
+  <div class="hero-actions">
+    <a href="{{ url_for('edukasi_view') }}" class="btn btn-secondary">
+      <i class="fas fa-bowl-food"></i>
+      <span>Panduan MP-ASI & Gizi</span>
+    </a>
+  </div>
+</div>
+
+{% if kids and kids | length > 0 %}
+  {% set current_kid = kids[0] %}
+  <!-- Info Profil Balita -->
+  <div class="card" style="background: linear-gradient(135deg, #FFFFFF 0%, #FAF7F2 100%);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="width: 58px; height: 58px; border-radius: 50%; background: var(--beige); color: var(--dark-brown); display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+          <i class="fas fa-child"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--dark-brown);">{{ current_kid.nama }}</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">
+            ID: <code>{{ current_kid.id_peserta }}</code> &bull; Jenis Kelamin: <strong>{{ current_kid.jenis_kelamin }}</strong> &bull; Dusun: {{ current_kid.alamat_dusun }}
+          </p>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-mocha" style="font-size: 0.82rem; padding: 6px 14px;">
+          Usia Saat Ini: {{ current_kid.usia_bulan }} Bulan
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metric Cards Status Terakhir -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-info">
+        <div class="stat-label">Berat Badan Terkini</div>
+        <div class="stat-value">{{ latest_exam.berat_kg or '-' }} kg</div>
+        <div class="stat-desc">Z-Score: <code>{{ latest_exam.z_bb_u or '-' }}</code></div>
+      </div>
+      <div class="stat-icon mocha"><i class="fas fa-weight-scale"></i></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <div class="stat-label">Tinggi Badan Terkini</div>
+        <div class="stat-value">{{ latest_exam.tinggi_cm or '-' }} cm</div>
+        <div class="stat-desc">Z-Score: <code>{{ latest_exam.z_tb_u or '-' }}</code></div>
+      </div>
+      <div class="stat-icon green"><i class="fas fa-ruler-vertical"></i></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <div class="stat-label">Status Gizi (WHO)</div>
+        <div class="stat-value" style="font-size: 1.3rem; color: var(--dark-brown);">{{ latest_exam.status_gizi or 'Normal' }}</div>
+        <div class="stat-desc">
+          {% if 'Stunting' in (latest_exam.status_gizi or '') %}
+            <span class="badge badge-red">Perlu Intervensi</span>
+          {% else %}
+            <span class="badge badge-green">Tumbuh Optimal</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="stat-icon blue"><i class="fas fa-heart-pulse"></i></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-info">
+        <div class="stat-label">Jadwal Posyandu Berikutnya</div>
+        <div class="stat-value" style="font-size: 1.15rem;">{{ latest_exam.jadwal_berikutnya or 'Bulan Depan' }}</div>
+        <div class="stat-desc"><i class="fas fa-calendar-check"></i> Rutin setiap bulan</div>
+      </div>
+      <div class="stat-icon amber"><i class="fas fa-calendar-day"></i></div>
+    </div>
+  </div>
+
+  <!-- Kurva Pertumbuhan Z-Score & KMS (Plotly Interactive) -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">
+          <i class="fas fa-chart-line"></i>
+          <span>Grafik Pertumbuhan KMS Digital & Standar WHO</span>
+        </div>
+        <div class="card-subtitle">Titik pertumbuhan {{ current_kid.nama }} dibandingkan dengan kurva rujukan WHO</div>
+      </div>
+    </div>
+    <div id="chartKMSBalita" style="width: 100%; height: 380px;"></div>
+  </div>
+
+  <!-- Riwayat Penimbangan Lengkap -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span>Riwayat Penimbangan & Pemeriksaan Posyandu</span>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Tanggal Periksa</th>
+            <th>Usia (Bln)</th>
+            <th>Berat (kg)</th>
+            <th>Tinggi (cm)</th>
+            <th>Z-Score BB/U</th>
+            <th>Z-Score TB/U</th>
+            <th>Status Gizi</th>
+            <th>Vitamin A</th>
+            <th>Imunisasi</th>
+            <th>Catatan Kader</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in exam_history %}
+          <tr>
+            <td><strong>{{ r.tanggal_str or (r.tanggal_pemeriksaan | string)[:10] or '-' }}</strong></td>
+            <td>{{ r.usia_bulan }} bln</td>
+            <td>{{ r.berat_kg }} kg</td>
+            <td>{{ r.tinggi_cm }} cm</td>
+            <td><code>{{ r.z_bb_u }}</code></td>
+            <td><code>{{ r.z_tb_u }}</code></td>
+            <td>
+              {% if 'Stunting' in r.status_gizi or 'Sangat' in r.status_gizi %}
+                <span class="badge badge-red">{{ r.status_gizi }}</span>
+              {% elif 'kurang' in r.status_gizi.lower() %}
+                <span class="badge badge-amber">{{ r.status_gizi }}</span>
+              {% else %}
+                <span class="badge badge-green">{{ r.status_gizi }}</span>
+              {% endif %}
+            </td>
+            <td>{{ r.vitamin_a or '-' }}</td>
+            <td>{{ r.imunisasi or '-' }}</td>
+            <td>{{ r.catatan or '-' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 24px;">
+              Belum ada riwayat penimbangan tercatat untuk balita ini.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% else %}
+  <div class="card" style="text-align: center; padding: 40px;">
+    <div style="font-size: 3rem; color: var(--mocha); margin-bottom: 14px;"><i class="fas fa-baby"></i></div>
+    <h3 style="color: var(--dark-brown); margin-bottom: 8px;">Belum Ada Data Balita Terhubung</h3>
+    <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 20px;">
+      Akun Anda belum terhubung dengan data balita di Posyandu. Silakan hubungi kader posyandu untuk mencocokkan data anak Anda.
+    </p>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if chart_kms_data %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var chartData = {{ chart_kms_data | tojson }};
+  
+  var traces = [
+    // WHO Lines
+    {
+      x: chartData.ages,
+      y: chartData.minus_2sd,
+      type: 'scatter',
+      mode: 'lines',
+      name: '-2 SD (Batas Bawah Normal)',
+      line: { color: '#E74C3C', dash: 'dot', width: 2 }
+    },
+    {
+      x: chartData.ages,
+      y: chartData.median,
+      type: 'scatter',
+      mode: 'lines',
+      name: 'Median WHO (Ideal)',
+      line: { color: '#2E7D32', width: 2.5 }
+    },
+    {
+      x: chartData.ages,
+      y: chartData.plus_2sd,
+      type: 'scatter',
+      mode: 'lines',
+      name: '+2 SD (Batas Atas Normal)',
+      line: { color: '#D97706', dash: 'dot', width: 2 }
+    },
+    // Child Growth Points
+    {
+      x: chartData.child_ages,
+      y: chartData.child_weights,
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: 'Pertumbuhan Anak',
+      marker: { size: 10, color: '#46372E', symbol: 'circle' },
+      line: { color: '#A68A76', width: 3 }
+    }
+  ];
+
+  var layout = {
+    font: { family: 'Plus Jakarta Sans', size: 12, color: '#46372E' },
+    margin: { t: 30, b: 50, l: 50, r: 20 },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    xaxis: { title: 'Usia (Bulan)', gridcolor: '#E8DCCB' },
+    yaxis: { title: 'Berat Badan (kg)', gridcolor: '#E8DCCB' },
+    legend: { orientation: 'h', y: -0.2 }
+  };
+
+  Plotly.newPlot('chartKMSBalita', traces, layout, { responsive: true, displayModeBar: false });
+});
+</script>
+{% endif %}
+{% endblock %}

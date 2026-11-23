@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Pemeriksaan Balita — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<div class="card-header" style="margin-bottom: 24px; border-bottom: none; padding-bottom: 0;">
+  <div>
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--dark-brown);">🧒 Pencatatan Pemeriksaan Balita</h2>
+    <p style="color: var(--text-secondary); margin-top: 4px;">Pencatatan penimbangan berat badan, tinggi badan, imunisasi, dan evaluasi Z-score antropometri WHO.</p>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; margin-bottom: 30px;">
+  <!-- Form Entry Pemeriksaan Balita -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom: 18px;">
+      <i class="fas fa-edit"></i>
+      <span>Formulir Pemeriksaan Baru</span>
+    </div>
+
+    <form method="POST" action="{{ url_for('simpan_pemeriksaan_balita') }}" id="formBalita">
+      <!-- Pilih Balita -->
+      <div class="form-group">
+        <label class="form-label" for="selectBalita">Pilih Balita Terdaftar *</label>
+        <select class="form-select" id="selectBalita" name="id_peserta" required onchange="onSelectBalita(this)">
+          <option value="">-- Pilih Balita --</option>
+          {% for b in balita_options %}
+            <option value="{{ b.id_peserta }}" data-nama="{{ b.nama }}" data-usia="{{ b.usia_bulan }}" data-gender="{{ b.jenis_kelamin }}" data-ortu="{{ b.nama_orang_tua }}" data-dusun="{{ b.alamat_dusun }}">
+              {{ b.id_peserta }} — {{ b.nama }} ({{ b.jenis_kelamin }}, {{ b.usia_bulan }} bln)
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Info Balita Terpilih -->
+      <div id="infoBalitaBox" style="display: none; background: var(--card-subtle); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+          <span><strong>Orang Tua:</strong> <span id="infoOrtu">-</span></span>
+          <span><strong>Dusun:</strong> <span id="infoDusun">-</span></span>
+          <span><strong>Gender:</strong> <span id="infoGender">-</span></span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tanggal Pemeriksaan *</label>
+          <input type="date" class="form-control" name="tanggal_pemeriksaan" value="{{ today_iso }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Usia Saat Pemeriksaan (Bulan) *</label>
+          <input type="number" step="0.1" class="form-control" id="inputUsia" name="usia_bulan" placeholder="contoh: 24" required oninput="calculateLiveZScore()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Berat Badan (kg) *</label>
+          <input type="number" step="0.1" class="form-control" id="inputBB" name="berat_kg" placeholder="contoh: 11.5" required oninput="calculateLiveZScore()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tinggi / Panjang Badan (cm) *</label>
+          <input type="number" step="0.1" class="form-control" id="inputTB" name="tinggi_cm" placeholder="contoh: 86.0" required oninput="calculateLiveZScore()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Lingkar Kepala (cm)</label>
+          <input type="number" step="0.1" class="form-control" name="lingkar_kepala_cm" placeholder="contoh: 47.5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pemberian Vitamin A</label>
+          <select class="form-select" name="vitamin_a">
+            <option value="Ya">Ya (Diberikan)</option>
+            <option value="Tidak">Tidak</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Status Imunisasi</label>
+        <select class="form-select" name="imunisasi">
+          <option value="Lengkap sesuai usia">Lengkap sesuai usia</option>
+          <option value="Belum lengkap">Belum lengkap</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Catatan Kader / Konseling</label>
+        <textarea class="form-control" name="catatan" rows="2" placeholder="Catatan kondisi anak, rekomendasi MP-ASI..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+        <i class="fas fa-save"></i>
+        <span>Simpan Data Pemeriksaan</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Live Calculator Preview Box (Auto Z-Score) -->
+  <div>
+    <div class="card" style="position: sticky; top: 90px;">
+      <div class="card-title" style="margin-bottom: 14px;">
+        <i class="fas fa-calculator" style="color: var(--mocha);"></i>
+        <span>Kalkulasi Otomatis Standar WHO</span>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 16px;">
+        Z-Score dihitung secara real-time berdasarkan rujukan antropometri standar WHO dan Kementerian Kesehatan RI.
+      </p>
+
+      <div class="calc-preview-box">
+        <div class="calc-item">
+          <div class="label">Z-Score BB/U</div>
+          <div class="val" id="previewZBB">-</div>
+          <small id="badgeZBB" class="badge badge-mocha" style="margin-top: 4px;">Menunggu Data</small>
+        </div>
+        <div class="calc-item">
+          <div class="label">Z-Score TB/U</div>
+          <div class="val" id="previewZTB">-</div>
+          <small id="badgeZTB" class="badge badge-mocha" style="margin-top: 4px;">Menunggu Data</small>
+        </div>
+      </div>
+
+      <div style="background: var(--card-subtle); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+        <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+          Status Gizi Kesimpulan
+        </div>
+        <div id="previewStatusGizi" style="font-size: 1.25rem; font-weight: 800; color: var(--dark-brown);">
+          Normal
+        </div>
+        <div id="previewRekomendasi" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px;">
+          Silakan masukkan usia, berat badan, dan tinggi badan untuk melihat evaluasi gizi.
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+        <i class="fas fa-info-circle"></i> Standar Z-Score: Normal (-2 SD s/d +2 SD), Stunting (TB/U &lt; -2 SD), Severely Stunted (TB/U &lt; -3 SD).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Riwayat Pemeriksaan Balita -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">
+        <i class="fas fa-list-check"></i>
+        <span>Riwayat Seluruh Pemeriksaan Balita</span>
+      </div>
+      <div class="card-subtitle">Menampilkan {{ riwayat_balita | length }} riwayat penimbangan balita</div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>ID & Nama Balita</th>
+          <th>Gender</th>
+          <th>Usia</th>
+          <th>BB (kg)</th>
+          <th>TB (cm)</th>
+          <th>Z-BB/U</th>
+          <th>Z-TB/U</th>
+          <th>Status Gizi</th>
+          <th>Imunisasi</th>
+          <th>Orang Tua</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in riwayat_balita %}
+        <tr>
+          <td><strong>{{ r.tanggal_str }}</strong></td>
+          <td><strong>{{ r.nama or r.id_peserta }}</strong></td>
+          <td>{{ r.jenis_kelamin or '-' }}</td>
+          <td>{{ r.usia_bulan }} bln</td>
+          <td>{{ r.berat_kg }} kg</td>
+          <td>{{ r.tinggi_cm }} cm</td>
+          <td><code>{{ r.z_bb_u }}</code></td>
+          <td><code>{{ r.z_tb_u }}</code></td>
+          <td>
+            {% if 'Stunting' in r.status_gizi or 'Sangat' in r.status_gizi %}
+              <span class="badge badge-red">{{ r.status_gizi }}</span>
+            {% elif 'kurang' in r.status_gizi.lower() %}
+              <span class="badge badge-amber">{{ r.status_gizi }}</span>
+            {% elif 'lebih' in r.status_gizi.lower() %}
+              <span class="badge badge-amber">{{ r.status_gizi }}</span>
+            {% else %}
+              <span class="badge badge-green">{{ r.status_gizi }}</span>
+            {% endif %}
+          </td>
+          <td>{{ r.imunisasi or '-' }}</td>
+          <td>{{ r.nama_orang_tua or '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// WHO Reference Interpolation Data
+var REF_WHO = {
+  "Laki-laki": {
+    ages: [0, 6, 12, 24, 36, 48, 60],
+    tb_m: [49.9, 67.6, 75.7, 87.8, 96.1, 103.3, 110.0],
+    tb_s: [1.9, 2.3, 2.5, 3.2, 3.7, 4.1, 4.5],
+    bb_m: [3.3, 7.9, 9.6, 12.2, 14.3, 16.3, 18.3],
+    bb_s: [0.4, 0.9, 1.1, 1.4, 1.7, 2.0, 2.4]
+  },
+  "Perempuan": {
+    ages: [0, 6, 12, 24, 36, 48, 60],
+    tb_m: [49.1, 65.7, 74.0, 86.4, 95.1, 102.7, 109.4],
+    tb_s: [1.9, 2.3, 2.6, 3.3, 3.8, 4.2, 4.6],
+    bb_m: [3.2, 7.3, 8.9, 11.5, 13.9, 16.1, 18.2],
+    bb_s: [0.4, 0.9, 1.1, 1.5, 1.8, 2.2, 2.6]
+  }
+};
+
+var currentGender = "Perempuan";
+
+function interp(x, xs, ys) {
+  if (x <= xs[0]) return ys[0];
+  if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
+  for (var i = 0; i < xs.length - 1; i++) {
+    if (x >= xs[i] && x <= xs[i + 1]) {
+      var t = (x - xs[i]) / (xs[i + 1] - xs[i]);
+      return ys[i] + t * (ys[i + 1] - ys[i]);
+    }
+  }
+  return ys[0];
+}
+
+function onSelectBalita(select) {
+  var opt = select.options[select.selectedIndex];
+  if (!opt.value) {
+    document.getElementById('infoBalitaBox').style.display = 'none';
+    return;
+  }
+  document.getElementById('infoBalitaBox').style.display = 'block';
+  document.getElementById('infoOrtu').textContent = opt.getAttribute('data-ortu') || '-';
+  document.getElementById('infoDusun').textContent = opt.getAttribute('data-dusun') || '-';
+  document.getElementById('infoGender').textContent = opt.getAttribute('data-gender') || '-';
+  currentGender = opt.getAttribute('data-gender') || 'Perempuan';
+
+  var usia = opt.getAttribute('data-usia');
+  if (usia) {
+    document.getElementById('inputUsia').value = usia;
+  }
+  calculateLiveZScore();
+}
+
+function calculateLiveZScore() {
+  var usia = parseFloat(document.getElementById('inputUsia').value);
+  var bb = parseFloat(document.getElementById('inputBB').value);
+  var tb = parseFloat(document.getElementById('inputTB').value);
+
+  if (isNaN(usia) || usia < 0) return;
+
+  var ref = REF_WHO[currentGender] || REF_WHO["Perempuan"];
+  var tbM = interp(usia, ref.ages, ref.tb_m);
+  var tbS = interp(usia, ref.ages, ref.tb_s);
+  var bbM = interp(usia, ref.ages, ref.bb_m);
+  var bbS = interp(usia, ref.ages, ref.bb_s);
+
+  if (!isNaN(bb)) {
+    var zbb = ((bb - bbM) / bbS).toFixed(2);
+    document.getElementById('previewZBB').textContent = zbb;
+    var bLabel = zbb < -2 ? "Kurang" : (zbb > 2 ? "Lebih" : "Normal");
+    var bClass = zbb < -2 ? "badge-amber" : (zbb > 2 ? "badge-mocha" : "badge-green");
+    var bEl = document.getElementById('badgeZBB');
+    bEl.className = "badge " + bClass;
+    bEl.textContent = bLabel;
+  }
+
+  if (!isNaN(tb)) {
+    var ztb = ((tb - tbM) / tbS).toFixed(2);
+    document.getElementById('previewZTB').textContent = ztb;
+    var tLabel = ztb < -3 ? "Sangat Pendek" : (ztb < -2 ? "Pendek (Stunted)" : (ztb > 3 ? "Tinggi" : "Normal"));
+    var tClass = ztb < -2 ? "badge-red" : "badge-green";
+    var tEl = document.getElementById('badgeZTB');
+    tEl.className = "badge " + tClass;
+    tEl.textContent = tLabel;
+  }
+
+  if (!isNaN(bb) && !isNaN(tb)) {
+    var zbbNum = parseFloat(document.getElementById('previewZBB').textContent);
+    var ztbNum = parseFloat(document.getElementById('previewZTB').textContent);
+    var status = "Normal";
+    var reco = "Pertumbuhan anak baik. Pertahankan pola makan gizi seimbang dan ASI/MP-ASI.";
+
+    if (ztbNum < -2) {
+      status = "Stunting / Perlu Penanganan Gizi";
+      reco = "Tinggi badan di bawah standar WHO. Perlu intervensi protein hewani dan konseling gizi.";
+    } else if (zbbNum < -2) {
+      status = "Gizi Kurang";
+      reco = "Berat badan kurang dari median. Tingkatkan asupan kalori dan pantau penimbangan berkala.";
+    } else if (zbbNum > 2) {
+      status = "Risiko Gizi Lebih";
+      reco = "Waspadai kelebihan berat badan, perhatikan porsi makanan manis dan seimbangkan aktivitas fisik.";
+    }
+
+    document.getElementById('previewStatusGizi').textContent = status;
+    document.getElementById('previewRekomendasi').textContent = reco;
+  }
+}
+</script>
+{% endblock %}

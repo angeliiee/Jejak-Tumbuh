@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}JEJAK TUMBUH — Posyandu Digital{% endblock %}</title>
+
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Plotly JS for Interactive Charts -->
+  <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+
+  <!-- Core Stylesheets (Cream Mocha) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cream_mocha.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- ═══════════════════════════════════════════════════════
+       INTERACTIVE AUTOEDA HOVER SIDEBAR
+  ═══════════════════════════════════════════════════════ -->
+  <aside class="sidebar mini" id="sidebar">
+    <!-- Brand Header -->
+    <a href="{{ url_for('index') }}" class="sidebar-brand">
+      <div class="brand-logo-box">
+        <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="Logo" class="brand-logo-img" onerror="this.src='https://raw.githubusercontent.com/adindaadeliafutri6-gif/Posyandu-Digital/main/JEJAK%20TUMBUH.jpeg'">
+      </div>
+      <div class="brand-text">
+        <h2>JEJAK TUMBUH</h2>
+        <p>Posyandu Digital</p>
+      </div>
+    </a>
+
+    <!-- Navigation Menu (Role-based) -->
+    <ul class="nav-menu">
+      <div class="nav-section-title">Menu Utama</div>
+
+      {% if session.get('user_role') == 'Kader' %}
+        <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-tip="Dashboard Posyandu">
+          <a href="{{ url_for('kader_dashboard') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-home"></i></span>
+            <span class="nav-label">Dashboard Posyandu</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'peserta' %}active{% endif %}" data-tip="Data Peserta">
+          <a href="{{ url_for('peserta_list') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-users"></i></span>
+            <span class="nav-label">Data Peserta</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'pemeriksaan_balita' %}active{% endif %}" data-tip="Pemeriksaan Balita">
+          <a href="{{ url_for('pemeriksaan_balita_view') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-child"></i></span>
+            <span class="nav-label">Pemeriksaan Balita</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'pemeriksaan_ibu' %}active{% endif %}" data-tip="Pemeriksaan Ibu Hamil">
+          <a href="{{ url_for('pemeriksaan_ibu_view') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-female"></i></span>
+            <span class="nav-label">Pemeriksaan Ibu Hamil</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'laporan' %}active{% endif %}" data-tip="Laporan & Rekapitulasi">
+          <a href="{{ url_for('laporan_view') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-file-medical-alt"></i></span>
+            <span class="nav-label">Laporan Posyandu</span>
+            <span class="nav-badge">Export</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'edukasi' %}active{% endif %}" data-tip="Pusat Edukasi">
+          <a href="{{ url_for('edukasi_view') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-book-medical"></i></span>
+            <span class="nav-label">Pusat Edukasi Gizi</span>
+          </a>
+        </li>
+
+      {% elif session.get('user_role') == 'Orang Tua Balita' %}
+        <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-tip="Dashboard Tumbuh Kembang">
+          <a href="{{ url_for('ortu_dashboard') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+            <span class="nav-label">Tumbuh Kembang</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'edukasi' %}active{% endif %}" data-tip="Panduan MP-ASI & Gizi">
+          <a href="{{ url_for('edukasi_view') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-bowl-food"></i></span>
+            <span class="nav-label">Panduan MP-ASI</span>
+          </a>
+        </li>
+
+      {% elif session.get('user_role') == 'Ibu Hamil' %}
+        <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-tip="Dashboard Kehamilan">
+          <a href="{{ url_for('ibu_dashboard') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-heart-pulse"></i></span>
+            <span class="nav-label">Kesehatan Kehamilan</span>
+          </a>
+        </li>
+        <li class="nav-item {% if active_page == 'edukasi' %}active{% endif %}" data-tip="Edukasi Kehamilan">
+          <a href="{{ url_for('edukasi_view') }}" class="nav-link">
+            <span class="nav-icon"><i class="fas fa-notes-medical"></i></span>
+            <span class="nav-label">Edukasi Kehamilan</span>
+          </a>
+        </li>
+      {% endif %}
+
+      <li class="nav-item nav-dropdown {% if active_page in ['kegiatan', 'panduan'] %}active{% endif %}" data-tip="Kalender & Panduan">
+        <details {% if active_page in ['kegiatan', 'panduan'] %}open{% endif %}>
+          <summary class="nav-link" data-tip="Kalender & Panduan">
+            <span class="nav-icon"><i class="far fa-calendar-alt"></i></span>
+            <span class="nav-label">Kalender & Panduan</span>
+            <i class="fas fa-chevron-down nav-disclosure-icon" aria-hidden="true"></i>
+          </summary>
+          <div class="nav-submenu">
+            <a href="{{ url_for('kegiatan_view') }}" {% if active_page == 'kegiatan' %}aria-current="page"{% endif %}>Kalender</a>
+            <a href="{{ url_for('panduan_view') }}" {% if active_page == 'panduan' %}aria-current="page"{% endif %}>Panduan Website</a>
+          </div>
+        </details>
+      </li>
+    </ul>
+
+    <!-- Sidebar Footer / User Profile -->
+    <div class="sidebar-footer">
+      <div class="sidebar-profile">
+        <div class="sp-avatar">
+          {{ (session.get('user_name', 'U')[:1]) | upper }}
+        </div>
+        <div class="sp-info">
+          <div class="sp-name">{{ session.get('user_name', 'Pengguna') }}</div>
+          <div class="sp-role">{{ session.get('user_role', 'Peserta') }}</div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="sp-logout" title="Keluar">
+          <i class="fas fa-arrow-right-from-bracket"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN VIEWPORT
+  ═══════════════════════════════════════════════════════ -->
+  <main class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-mobile-toggle" id="sidebarMobileToggle" aria-label="Toggle Sidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-brand-title">
+          <span>JEJAK TUMBUH</span>
+          <span class="badge-role">{{ session.get('user_role', 'Posyandu') }}</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="date-badge">
+          <i class="far fa-calendar-alt"></i>
+          <span id="currentDateDisplay">{{ today_str or 'Posyandu Digital' }}</span>
+        </div>
+
+        <div class="user-badge-top" onclick="window.location.href='{{ url_for('logout') }}'" title="Klik untuk keluar">
+          <div class="user-avatar-sm">
+            {{ (session.get('user_name', 'U')[:1]) | upper }}
+          </div>
+          <span class="user-name-sm">{{ session.get('user_name', 'Pengguna') }}</span>
+          <i class="fas fa-sign-out-alt" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 2px;"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content Container -->
+    <div class="page-container animate-fade-in">
+      <!-- Flash Alert Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <script id="server-flash-data" type="application/json">{{ messages|tojson }}</script>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<!-- Interactive Sidebar Script -->
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Laporan & Rekapitulasi — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<div class="card-header" style="margin-bottom: 24px; border-bottom: none; padding-bottom: 0;">
+  <div>
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--dark-brown);">📊 Laporan & Rekapitulasi Posyandu</h2>
+    <p style="color: var(--text-secondary); margin-top: 4px;">Penyusunan rekapitulasi data bulanan, analisis agregat gizi WHO, dan ekspor resmi ke format Excel (.xlsx) dan PDF.</p>
+  </div>
+</div>
+
+<!-- Filter Periode Laporan & Export Bar -->
+<div class="card" style="padding: 20px 24px; margin-bottom: 24px;">
+  <form method="GET" action="{{ url_for('laporan_view') }}" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <i class="fas fa-calendar-check" style="font-size: 1.2rem; color: var(--mocha);"></i>
+      <div>
+        <div style="font-weight: 800; font-size: 0.95rem; color: var(--dark-brown);">Periode Rekapitulasi:</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted);">Pilih bulan dan tahun data</div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <select name="bulan" class="form-select" style="width: 160px; padding: 8px 12px;">
+        <option value="">Semua Bulan</option>
+        {% for b_num, b_name in bulan_options %}
+          <option value="{{ b_num }}" {% if selected_bulan == b_num %}selected{% endif %}>{{ b_name }}</option>
+        {% endfor %}
+      </select>
+      <select name="tahun" class="form-select" style="width: 130px; padding: 8px 12px;">
+        <option value="">Semua Tahun</option>
+        {% for yr in tahun_options %}
+          <option value="{{ yr }}" {% if selected_tahun == yr %}selected{% endif %}>{{ yr }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrows-rotate"></i> Perbarui Tampilan
+      </button>
+
+      <!-- Ekspor Buttons -->
+      <a href="{{ url_for('ekspor_excel', bulan=selected_bulan, tahun=selected_tahun) }}" class="btn btn-primary btn-sm" title="Unduh Spreadsheet Excel">
+        <i class="fas fa-file-excel"></i>
+        <span>Ekspor Excel (.xlsx)</span>
+      </a>
+      <a href="{{ url_for('ekspor_pdf', bulan=selected_bulan, tahun=selected_tahun) }}" class="btn btn-outline btn-sm" target="_blank" title="Cetak Berkas PDF Resmi">
+        <i class="fas fa-file-pdf"></i>
+        <span>Cetak PDF Resmi</span>
+      </a>
+    </div>
+  </form>
+</div>
+
+<!-- Rekapitulasi Ringkasan Eksekutif -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Balita Ditimbang</div>
+      <div class="stat-value">{{ rekap.total_balita_diperiksa }}</div>
+      <div class="stat-desc">Orang anak</div>
+    </div>
+    <div class="stat-icon mocha">
+      <i class="fas fa-scale-balanced"></i>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Balita Status Normal</div>
+      <div class="stat-value" style="color: var(--green);">{{ rekap.balita_normal }}</div>
+      <div class="stat-desc">Standar pertumbuhan WHO</div>
+    </div>
+    <div class="stat-icon green">
+      <i class="fas fa-circle-check"></i>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Balita Stunting / Underweight</div>
+      <div class="stat-value" style="color: var(--red);">{{ rekap.balita_stunting }}</div>
+      <div class="stat-desc">Perlu suplemen & MP-ASI</div>
+    </div>
+    <div class="stat-icon red">
+      <i class="fas fa-triangle-exclamation"></i>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-info">
+      <div class="stat-label">Ibu Hamil Risiko Tinggi</div>
+      <div class="stat-value" style="color: var(--amber);">{{ rekap.ibu_risiko_tinggi }}</div>
+      <div class="stat-desc">Perlu rujukan faskes</div>
+    </div>
+    <div class="stat-icon amber">
+      <i class="fas fa-hospital-user"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Tabel Rincian Rekapitulasi Standar Posyandu -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px;">
+  <!-- Rekap Balita -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom: 16px;">
+      <i class="fas fa-child"></i>
+      <span>Rekapitulasi Indikator Balita (WHO)</span>
+    </div>
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Indikator / Status Antropometri</th>
+          <th style="text-align: right;">Jumlah</th>
+          <th style="text-align: right;">Persentase</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-green">Gizi Baik / Normal</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.balita_normal }}</strong></td>
+          <td style="text-align: right;">{{ rekap.balita_normal_pct }}%</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">Gizi Kurang (Underweight)</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.balita_kurang }}</strong></td>
+          <td style="text-align: right;">{{ rekap.balita_kurang_pct }}%</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">Stunting (Pendek / Sangat Pendek)</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.balita_stunting }}</strong></td>
+          <td style="text-align: right;">{{ rekap.balita_stunting_pct }}%</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-mocha">Risiko Gizi Lebih</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.balita_lebih }}</strong></td>
+          <td style="text-align: right;">{{ rekap.balita_lebih_pct }}%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Rekap Ibu Hamil -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom: 16px;">
+      <i class="fas fa-female"></i>
+      <span>Rekapitulasi Indikator Ibu Hamil (ANC)</span>
+    </div>
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Indikator Maternal Kemenkes</th>
+          <th style="text-align: right;">Jumlah</th>
+          <th style="text-align: right;">Keterangan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Total Ibu Hamil Diperiksa</td>
+          <td style="text-align: right;"><strong>{{ rekap.total_ibu_diperiksa }}</strong></td>
+          <td style="text-align: right;">Kunjungan ANC</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">Kurang Energi Kronis (KEK)</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.ibu_kek }}</strong></td>
+          <td style="text-align: right;">LILA &lt; 23.5 cm</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">Anemia Gestasional</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.ibu_anemia }}</strong></td>
+          <td style="text-align: right;">Hb &lt; 11.0 g/dL</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">Hipertensi / Preeklamsia</span></td>
+          <td style="text-align: right;"><strong>{{ rekap.ibu_hipertensi }}</strong></td>
+          <td style="text-align: right;">TD &ge; 140/90 mmHg</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Simpan Riwayat Laporan ke Database -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <i class="fas fa-folder-open"></i>
+      <span>Simpan & Serahkan Laporan ke Puskesmas</span>
+    </div>
+  </div>
+  <form method="POST" action="{{ url_for('simpan_arsip_laporan') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+    <input type="hidden" name="periode" value="{{ selected_periode_str }}">
+    <div style="flex: 1; min-width: 250px;">
+      <label class="form-label">Catatan Tambahan untuk Petugas Puskesmas</label>
+      <input type="text" class="form-control" name="catatan" placeholder="contoh: Rekapitulasi posyandu melati, stunting 2 balita telah diintervensi...">
+    </div>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-cloud-arrow-up"></i>
+      <span>Simpan Arsip Laporan ({{ selected_periode_str }})</span>
+    </button>
+  </form>
+
+  <div style="margin-top: 24px;">
+    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--dark-brown); margin-bottom: 12px;">
+      Arsip Riwayat Laporan Tersimpan
+    </h4>
+    <div class="table-responsive">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>ID Laporan</th>
+            <th>Periode</th>
+            <th>Dibuat Oleh</th>
+            <th>Tanggal Dibuat</th>
+            <th>Status Penyerahan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lap in riwayat_laporan %}
+          <tr>
+            <td><strong>{{ lap.id_laporan }}</strong></td>
+            <td>{{ lap.periode }}</td>
+            <td>{{ lap.dibuat_oleh }}</td>
+            <td>{{ lap.tanggal_dibuat }}</td>
+            <td>
+              {% if 'Diserahkan' in lap.status %}
+                <span class="badge badge-green"><i class="fas fa-check"></i> {{ lap.status }}</span>
+              {% else %}
+                <span class="badge badge-amber"><i class="fas fa-clock"></i> {{ lap.status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if 'Diserahkan' not in lap.status %}
+                <form method="POST" action="{{ url_for('serahkan_laporan_ke_puskesmas', id_laporan=lap.id_laporan) }}" style="display: inline;">
+                  <button type="submit" class="btn btn-sm btn-success">
+                    <i class="fas fa-paper-plane"></i> Serahkan
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fas fa-calendar-check"></i> {{ lap.tanggal_serah or '-' }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">
+              Belum ada riwayat laporan yang diarsipkan.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

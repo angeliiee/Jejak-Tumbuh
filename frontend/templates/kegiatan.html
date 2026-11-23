@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Kalender Posyandu — JEJAK TUMBUH{% endblock %}
+
+{% block content %}
+<section class="calendar-page">
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">Jadwal layanan</p>
+      <h1>Kalender Posyandu</h1>
+      <p>Jadwal diambil dari tanggal kunjungan berikutnya pada catatan pemeriksaan.</p>
+    </div>
+    <span class="calendar-count"><i class="far fa-calendar-check"></i> {{ event_count }} jadwal bulan ini</span>
+  </div>
+
+  <div class="card calendar-card">
+    <div class="calendar-toolbar">
+      <a class="btn btn-secondary" href="{{ url_for('kegiatan_view', bulan=previous_month, tahun=previous_year) }}" aria-label="Bulan sebelumnya"><i class="fas fa-chevron-left"></i></a>
+      <h2>{{ month_name }} {{ year }}</h2>
+      <a class="btn btn-secondary" href="{{ url_for('kegiatan_view', bulan=next_month, tahun=next_year) }}" aria-label="Bulan berikutnya"><i class="fas fa-chevron-right"></i></a>
+    </div>
+
+    <div class="calendar-grid" role="grid" aria-label="Kalender {{ month_name }} {{ year }}">
+      {% for weekday in weekday_names %}<div class="calendar-weekday" role="columnheader">{{ weekday }}</div>{% endfor %}
+      {% for week in weeks %}
+        {% for day in week %}
+          {% if day %}
+            <div class="calendar-day {% if today.day == day and today.month == month and today.year == year %}is-today{% endif %}" role="gridcell">
+              <span class="calendar-day-number">{{ day }}</span>
+              {% for event in month_days.get(day, [])[:2] %}
+                <span class="calendar-event-chip" title="{{ event.type }} — {{ event.name }}">{{ event.name }}</span>
+              {% endfor %}
+              {% if month_days.get(day, [])|length > 2 %}<span class="calendar-more">+{{ month_days.get(day, [])|length - 2 }} lainnya</span>{% endif %}
+            </div>
+          {% else %}<div class="calendar-day is-empty" aria-hidden="true"></div>{% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card calendar-agenda">
+    <div class="section-heading">
+      <div><h2>Agenda bulan ini</h2><p>Rincian jadwal yang tercatat untuk akun Anda.</p></div>
+    </div>
+    {% if month_events %}
+      <div class="agenda-list">
+        {% for event in month_events %}
+          <article class="agenda-item">
+            <div class="agenda-date"><strong>{{ event.date.strftime('%d') }}</strong><span>{{ month_name[:3] }}</span></div>
+            <div class="agenda-details"><h3>{{ event.name }}</h3><p>{{ event.type }} · {{ event.location }} · ID {{ event.id_peserta }}</p></div>
+            <span class="agenda-status {% if event.status == 'Terlewat' %}is-past{% endif %}">{{ event.status }}</span>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><i class="far fa-calendar"></i><h3>Belum ada jadwal bulan ini</h3><p>Jadwal akan muncul setelah tanggal kunjungan berikutnya dicatat pada pemeriksaan.</p></div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .calendar-page { display:grid; gap:22px; }
+  .page-heading,.calendar-toolbar,.section-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .page-heading h1 { color:var(--dark-brown); font-size:1.65rem; margin:4px 0; }
+  .page-heading p,.section-heading p { color:var(--text-secondary); font-size:.88rem; }
+  .eyebrow { color:var(--mocha); font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+  .calendar-count { color:var(--text-secondary); font-size:.84rem; }
+  .calendar-card,.calendar-agenda { padding:22px; }
+  .calendar-toolbar { justify-content:center; margin-bottom:20px; }
+  .calendar-toolbar h2 { min-width:190px; text-align:center; color:var(--dark-brown); font-size:1.1rem; }
+  .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); border-top:1px solid var(--border); border-left:1px solid var(--border); }
+  .calendar-weekday { padding:9px 5px; background:var(--card-subtle); color:var(--text-secondary); font-size:.75rem; font-weight:800; text-align:center; }
+  .calendar-day { min-height:95px; padding:8px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); overflow:hidden; }
+  .calendar-day.is-empty { background:#faf8f5; }
+  .calendar-day.is-today { background:var(--primary-light); }
+  .calendar-day-number { display:grid; place-items:center; width:25px; height:25px; margin-bottom:5px; border-radius:50%; color:var(--dark-brown); font-size:.78rem; font-weight:700; }
+  .is-today .calendar-day-number { color:var(--white); background:var(--mocha); }
+  .calendar-event-chip { display:block; overflow:hidden; margin-top:4px; padding:3px 5px; border-radius:5px; background:var(--beige); color:var(--dark-brown); font-size:.66rem; text-overflow:ellipsis; white-space:nowrap; }
+  .calendar-more { display:block; margin-top:3px; color:var(--text-muted); font-size:.64rem; }
+  .section-heading { margin-bottom:14px; }
+  .section-heading h2 { color:var(--dark-brown); font-size:1.05rem; }
+  .agenda-list { display:grid; }
+  .agenda-item { display:flex; align-items:center; gap:14px; padding:13px 0; border-top:1px solid var(--border-light); }
+  .agenda-date { display:grid; place-items:center; min-width:48px; padding:6px; border-radius:10px; background:var(--card-subtle); color:var(--dark-brown); }
+  .agenda-date strong { font-size:1.05rem; }.agenda-date span { font-size:.65rem; text-transform:uppercase; }
+  .agenda-details { flex:1; min-width:0; }.agenda-details h3 { color:var(--dark-brown); font-size:.9rem; }.agenda-details p { margin-top:3px; color:var(--text-secondary); font-size:.76rem; }
+  .agenda-status { padding:5px 9px; border-radius:20px; background:#e6f2e9; color:#326a46; font-size:.7rem; font-weight:700; }
+  .agenda-status.is-past { background:#f4e8e5; color:#8d4b40; }
+  .empty-state { padding:28px 12px; text-align:center; color:var(--text-secondary); }.empty-state i { color:var(--mocha); font-size:1.5rem; }.empty-state h3 { margin:8px 0 4px; color:var(--dark-brown); font-size:.95rem; }.empty-state p { font-size:.82rem; }
+  @media(max-width:650px) { .calendar-card,.calendar-agenda { padding:12px; }.calendar-day { min-height:58px; padding:4px; }.calendar-event-chip { font-size:0; height:5px; padding:0; }.calendar-more { display:none; }.page-heading { align-items:flex-start; flex-direction:column; }.agenda-item { align-items:flex-start; flex-wrap:wrap; }.agenda-status { margin-left:62px; } }
+</style>
+{% endblock %}

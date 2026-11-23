@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selamat Datang — JEJAK TUMBUH Posyandu Digital</title>
+
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6.5 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Cream Mocha Theme & Landing Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cream_mocha.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body class="landing-body">
+
+  <div class="bg-decor bg-decor-1"></div>
+  <div class="bg-decor bg-decor-2"></div>
+
+  <div class="landing-container">
+    <!-- Stepper Navigation Header (AutoEDA Onboarding Style) -->
+    <div class="landing-stepper-bar">
+      <div class="stepper-pill active" id="stepper-pill-1" onclick="goToStep(1)">
+        <span class="stepper-dot"></span>
+        <span>1. Sambutan</span>
+      </div>
+      <div class="stepper-line"></div>
+      <div class="stepper-pill" id="stepper-pill-2" onclick="goToStep(2)">
+        <span class="stepper-dot"></span>
+        <span>2. Panduan & Aktor</span>
+      </div>
+      <div class="stepper-line"></div>
+      <div class="stepper-pill" id="stepper-pill-3" onclick="goToStep(3)">
+        <span class="stepper-dot"></span>
+        <span>3. Masuk / Daftar</span>
+      </div>
+    </div>
+
+    <!-- Main Card Container -->
+    <div class="landing-card">
+
+      <!-- Flash Notification Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <script id="server-flash-data" type="application/json">{{ messages|tojson }}</script>
+        {% endif %}
+      {% endwith %}
+
+      <!-- ═══════════════════════════════════════════════════════
+           HALAMAN 1 — WELCOME & PENGENALAN
+      ═══════════════════════════════════════════════════════ -->
+      <section class="landing-step active" id="step-1">
+        <div class="welcome-hero">
+          <div class="welcome-left">
+            <div class="welcome-logo-box">
+              <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="Logo JEJAK TUMBUH" class="welcome-logo-img" onerror="this.src='https://raw.githubusercontent.com/adindaadeliafutri6-gif/Posyandu-Digital/main/JEJAK%20TUMBUH.jpeg'">
+              <div>
+                <div class="welcome-app-name">JEJAK TUMBUH</div>
+                <div class="welcome-tagline">Posyandu Digital Terintegrasi</div>
+              </div>
+            </div>
+
+            <h1 class="welcome-title">
+              Pantau Tumbuh Kembang, <br>
+              <span class="welcome-title-gradient">Wujudkan Generasi Sehat.</span>
+            </h1>
+
+            <p class="welcome-desc">
+              Selamat datang di <strong>JEJAK TUMBUH</strong> — platform digital modern layanan Posyandu untuk pencatatan antropometri balita standar WHO, pemantauan kesehatan ibu hamil Kemenkes RI, serta pelaporan otomatis yang akurat dan transparan.
+            </p>
+
+            <div class="welcome-features-list">
+              <div class="welcome-feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Standar Antropometri WHO & Kurva Pertumbuhan KMS Digital</span>
+              </div>
+              <div class="welcome-feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Skrining Dini Risiko Ibu Hamil & Buku KIA Terintegrasi</span>
+              </div>
+              <div class="welcome-feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Rekapitulasi Laporan Otomatis Siap Ekspor PDF dan Excel</span>
+              </div>
+            </div>
+
+            <div class="landing-nav-btns" style="border-top: none; padding-top: 0;">
+              <div></div>
+              <button class="btn btn-primary" onclick="goToStep(2)">
+                <span>Pelajari Cara Penggunaan</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="welcome-right">
+            <div class="welcome-illustration">
+              <div class="posyandu-art-box">
+                {{ posyandu_art|safe }}
+              </div>
+              <div class="art-caption">Layanan Posyandu Masa Depan</div>
+              <div class="art-sub">Aman, Terstruktur, Terhubung dengan Database</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           HALAMAN 2 — TATA CARA PENGGUNAAN & TIGA AKTOR
+      ═══════════════════════════════════════════════════════ -->
+      <section class="landing-step" id="step-2">
+        <div class="guide-header">
+          <span class="badge badge-mocha" style="margin-bottom: 10px;">Panduan Terpadu</span>
+          <h2 class="guide-title">Tiga Aktor & Alur Penggunaan</h2>
+          <p class="guide-desc">
+            Aplikasi didesain secara spesifik untuk memfasilitasi kolaborasi tiga peran utama di lingkungan Posyandu.
+          </p>
+        </div>
+
+        <!-- Kartu 3 Aktor -->
+        <div class="actors-grid">
+          <!-- Aktor 1: Kader Posyandu -->
+          <div class="actor-card kader">
+            <div class="actor-icon-bubble">
+              <i class="fas fa-user-nurse"></i>
+            </div>
+            <span class="actor-tag">Aktor 1</span>
+            <h3>Kader Posyandu</h3>
+            <p>
+              Mencatat data penimbangan balita, pemeriksaan ANC ibu hamil, memantau risiko stunting & KEK, serta menghasilkan laporan bulanan otomatis.
+            </p>
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">
+              Akses: Full Dashboard, Entry Pemeriksaan, Ekspor Laporan
+            </div>
+          </div>
+
+          <!-- Aktor 2: Orang Tua Balita -->
+          <div class="actor-card ortu">
+            <div class="actor-icon-bubble">
+              <i class="fas fa-baby"></i>
+            </div>
+            <span class="actor-tag">Aktor 2</span>
+            <h3>Orang Tua Balita</h3>
+            <p>
+              Memantau riwayat berat badan, tinggi badan, kurva Z-score WHO, status gizi balita secara real-time, serta edukasi jadwal imunisasi & MP-ASI.
+            </p>
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">
+              Akses: Buku KMS Digital, Riwayat Timbang, Edukasi Gizi
+            </div>
+          </div>
+
+          <!-- Aktor 3: Ibu Hamil -->
+          <div class="actor-card ibu">
+            <div class="actor-icon-bubble">
+              <i class="fas fa-female"></i>
+            </div>
+            <span class="actor-tag">Aktor 3</span>
+            <h3>Ibu Hamil</h3>
+            <p>
+              Melihat perkembangan usia kehamilan, riwayat tekanan darah, LILA, kadar Hb, taksiran persalinan (HPL), dan deteksi dini faktor risiko.
+            </p>
+            <div style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600;">
+              Akses: Buku KIA Digital, Jadwal Kontrol, Tips Kehamilan
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Langkah Penggunaan -->
+        <div class="feature-steps-box">
+          <div style="text-align: center; font-size: 0.85rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">
+            Alur Kerja Pemeriksaan Posyandu
+          </div>
+          <div class="steps-list">
+            <div class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-text">Masuk / Pilih Akun</div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-text">Pengukuran & Form</div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-text">Kalkulasi Otomatis</div>
+            </div>
+            <div class="step-item">
+              <div class="step-num">4</div>
+              <div class="step-text">Laporan & KMS</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigasi -->
+        <div class="landing-nav-btns">
+          <button class="btn btn-secondary" onclick="goToStep(1)">
+            <i class="fas fa-arrow-left"></i>
+            <span>Kembali</span>
+          </button>
+          <button class="btn btn-primary" onclick="goToStep(3)">
+            <span>Lanjut ke Autentikasi</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           HALAMAN 3 — LOGIN, REGISTRASI & AKUN DEMO
+      ═══════════════════════════════════════════════════════ -->
+      <section class="landing-step" id="step-3">
+        <div class="auth-wrapper">
+          <!-- Kiri: Form Login & Register Tabs -->
+          <div class="auth-form-card">
+            <div class="auth-tabs">
+              <div class="auth-tab active" id="tab-btn-login" onclick="switchAuthTab('login')">
+                <i class="fas fa-lock" style="margin-right: 6px;"></i> Masuk (Login)
+              </div>
+              <div class="auth-tab" id="tab-btn-reg" onclick="switchAuthTab('reg')">
+                <i class="fas fa-user-plus" style="margin-right: 6px;"></i> Daftar Baru
+              </div>
+            </div>
+
+            <!-- Form Login -->
+            <form id="form-login" action="{{ url_for('login') }}" method="POST">
+              <div class="form-group">
+                <label class="form-label" for="login-email">Username atau Alamat Email</label>
+                <input type="text" class="form-control" id="login-email" name="username_or_email" placeholder="contoh: kader1 atau ort001@posyandu.id" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="login-password">Kata Sandi (Password)</label>
+                <input type="password" class="form-control" id="login-password" name="password" placeholder="Masukkan kata sandi" required>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width: 100%; margin-top: 10px;">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Masuk ke Dashboard</span>
+              </button>
+            </form>
+
+            <!-- Form Registrasi Mandiri -->
+            <form id="form-reg" action="{{ url_for('register') }}" method="POST" style="display: none;">
+              <div class="form-group">
+                <label class="form-label">Daftar Sebagai Peran *</label>
+                <select class="form-select" id="registration-role" name="role" required>
+                  <option value="Orang Tua Balita">Orang Tua Balita</option>
+                  <option value="Ibu Hamil">Ibu Hamil</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" id="registration-name-label" for="registration-name">Nama Orang Tua *</label>
+                <input type="text" class="form-control" id="registration-name" name="nama" placeholder="Nama orang tua" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Alamat Email *</label>
+                <input type="email" class="form-control" name="email" placeholder="contoh: siti@email.com" required>
+              </div>
+
+              <fieldset class="form-role-fields" id="registration-fields-ortu">
+                <legend class="form-label">Biodata Balita</legend>
+                <div class="form-group">
+                  <label class="form-label" for="registration-child-name">Nama Balita *</label>
+                  <input type="text" class="form-control" id="registration-child-name" name="nama_balita" placeholder="Nama lengkap balita" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="registration-child-dob">Tanggal Lahir *</label>
+                    <input type="date" class="form-control" id="registration-child-dob" name="tanggal_lahir" max="{{ today_iso }}" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="registration-child-sex">Jenis Kelamin *</label>
+                    <select class="form-select" id="registration-child-sex" name="jenis_kelamin" required>
+                      <option value="">Pilih</option>
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="form-role-fields" id="registration-fields-ibu" hidden disabled>
+                <legend class="form-label">Biodata Ibu Hamil</legend>
+                <div class="form-group">
+                  <label class="form-label" for="registration-companion">Nama Suami atau Pendamping *</label>
+                  <input type="text" class="form-control" id="registration-companion" name="nama_suami" placeholder="Nama suami atau pendamping" required>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="registration-age">Usia Ibu (tahun) *</label>
+                    <input type="number" class="form-control" id="registration-age" name="usia_ibu_tahun" min="10" max="60" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="registration-pregnancy">Usia Kandungan (minggu) *</label>
+                    <input type="number" class="form-control" id="registration-pregnancy" name="usia_kehamilan_minggu" min="1" max="45" required>
+                  </div>
+                </div>
+              </fieldset>
+
+              <div class="form-group">
+                <label class="form-label" for="registration-address">Alamat *</label>
+                <input type="text" class="form-control" id="registration-address" name="alamat" placeholder="Nama jalan atau nomor rumah" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="registration-rt">RT *</label>
+                  <input type="text" class="form-control" id="registration-rt" name="rt" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="registration-rw">RW *</label>
+                  <input type="text" class="form-control" id="registration-rw" name="rw" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="registration-dusun">Dusun *</label>
+                <input type="text" class="form-control" id="registration-dusun" name="alamat_dusun" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Password *</label>
+                  <input type="password" class="form-control" name="password" placeholder="Min. 6 karakter" required minlength="6">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Konfirmasi Password *</label>
+                  <input type="password" class="form-control" name="password_confirm" placeholder="Ulangi password" required minlength="6">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+                <i class="fas fa-check-circle"></i>
+                <span>Daftarkan Akun Sekarang</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Kanan: Akun Demo 1-Klik untuk Dosen -->
+          <div class="demo-accounts-box">
+            <div class="demo-title">
+              <i class="fas fa-id-badge" style="color: var(--mocha);"></i>
+              <span>Akun Demo Cepat (Untuk Dosen)</span>
+            </div>
+            <p class="demo-desc">
+              Klik salah satu akun di bawah ini untuk langsung mengisi formulir dan masuk ke dashboard masing-masing aktor tanpa perlu registrasi manual.
+            </p>
+
+            <div class="demo-cards-list">
+              <!-- Demo 1: Kader Posyandu -->
+              <div class="demo-card-item" onclick="fillDemoAccount('kader1', 'kader123', true)">
+                <div class="demo-actor-info">
+                  <div class="demo-actor-avatar kader">
+                    <i class="fas fa-user-nurse"></i>
+                  </div>
+                  <div class="demo-actor-meta">
+                    <div class="name">Kader Citra Wijaya</div>
+                    <div class="cred">user: <code>kader1</code> | pass: <code>kader123</code></div>
+                  </div>
+                </div>
+                <button type="button" class="btn-fill-demo">1-Klik Masuk &rarr;</button>
+              </div>
+
+              <!-- Demo 2: Orang Tua Balita -->
+              <div class="demo-card-item" onclick="fillDemoAccount('ort001', 'demo123', true)">
+                <div class="demo-actor-info">
+                  <div class="demo-actor-avatar ortu">
+                    <i class="fas fa-baby"></i>
+                  </div>
+                  <div class="demo-actor-meta">
+                    <div class="name">Dewi Kusuma (Ibu Balita)</div>
+                    <div class="cred">user: <code>ort001</code> | pass: <code>demo123</code></div>
+                  </div>
+                </div>
+                <button type="button" class="btn-fill-demo">1-Klik Masuk &rarr;</button>
+              </div>
+
+              <!-- Demo 3: Ibu Hamil -->
+              <div class="demo-card-item" onclick="fillDemoAccount('ibu001', 'demo123', true)">
+                <div class="demo-actor-info">
+                  <div class="demo-actor-avatar ibu">
+                    <i class="fas fa-female"></i>
+                  </div>
+                  <div class="demo-actor-meta">
+                    <div class="name">Rina Setiawan (Ibu Hamil)</div>
+                    <div class="cred">user: <code>ibu001</code> | pass: <code>demo123</code></div>
+                  </div>
+                </div>
+                <button type="button" class="btn-fill-demo">1-Klik Masuk &rarr;</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); font-size: 0.74rem; color: var(--text-muted); text-align: center;">
+              <i class="fas fa-shield-alt"></i> Data terhubung langsung dengan Database & Standar WHO.
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigasi Bawah -->
+        <div class="landing-nav-btns">
+          <button class="btn btn-secondary" onclick="goToStep(2)">
+            <i class="fas fa-arrow-left"></i>
+            <span>Kembali ke Panduan</span>
+          </button>
+          <div></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 24px; font-size: 0.78rem; color: var(--text-muted);">
+      &copy; 2026 JEJAK TUMBUH &bull; Posyandu Digital. Hak Cipta Dilindungi.
+    </div>
+  </div>
+
+  <!-- Script Navigation -->
+  <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+</body>
+</html>
