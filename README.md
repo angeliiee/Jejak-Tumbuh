@@ -1,7 +1,7 @@
 # Jejak-Tumbuh
 <div align="center">
 
-<img src="frontend/assets/JEJAK_TUMBUH.jpeg" alt="Logo JEJAK TUMBUH" width="140">
+<img src="https://raw.githubusercontent.com/adindaadeliafutri6-gif/jejak-tumbuh/main/jejak%20tumbuh%20(2).jpeg" alt="Logo JEJAK TUMBUH" width="140">
 
 # JEJAK TUMBUH
 ### Posyandu Digital: Pantau Tumbuh Kembang Balita dan Kesehatan Ibu Hamil
@@ -258,10 +258,10 @@ python tests/test_web_app.py
 | No | Nama | NIM |
 |---|---|---|
 | 1 | Adinda Adelia Futri | 52250055 |
-| 2 | Angelica Florentina M | - |
-| 3 | Kayla Aprilia | - |
-| 4 | Naifa Edria Arta | - |
-| 5 | Adinda Maiza Ishfahani | - |
+| 2 | Angelica Florentina M | 52250063 |
+| 3 | Kayla Aprilia | 52250057 |
+| 4 | Naifa Edria Arta | 52250056 |
+| 5 | Adinda Maiza Ishfahani | 52250074 |
 
 **Dosen Pengampu:** Dr. Andi Pujo Rahadi, S.T., M.Sc
 
