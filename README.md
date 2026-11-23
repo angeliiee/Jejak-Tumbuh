@@ -269,4 +269,4 @@ python tests/test_web_app.py
 **Fakultas:** Fakultas Teknik dan Design (FTD)
 **Institusi:** Institut Teknologi Sains Bandung
 
-Repositori: [github.com/angeliiee/Posyandu-Digitall](https://github.com/angeliiee/Posyandu-Digitall)
+Repositori: [github.com/angeliiee/Jejak-Tumbuh]((https://github.com/angeliiee/Jejak-Tumbuh)]
