@@ -154,10 +154,12 @@ def get_db_status() -> dict:
     }
 
 
-# ==========================================
-# LOCAL STORAGE ENGINE (FALLBACK HANDLER)
-# ==========================================
-DATA_DIR = APP_DIR / "data"
+# Gunakan folder sementara di Vercel dan folder data lokal di komputer
+if os.environ.get("VERCEL"):
+    DATA_DIR = Path("/tmp/jejak_tumbuh_data")
+else:
+    DATA_DIR = APP_DIR / "data"
+
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 CSV_FILES = {
