@@ -269,4 +269,4 @@ python tests/test_web_app.py
 **Fakultas:** Fakultas Teknik dan Design (FTD)
 **Institusi:** Institut Teknologi Sains Bandung
 
-Repositori: [(https://github.com/angeliiee/Jejak-Tumbuh)]
+Repositori: https://github.com/angeliiee/Jejak-Tumbuh
