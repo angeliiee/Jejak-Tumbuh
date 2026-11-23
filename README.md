@@ -265,4 +265,8 @@ python tests/test_web_app.py
 
 **Dosen Pengampu:** Dr. Andi Pujo Rahadi, S.T., M.Sc
 
+**Program Studi:** Sains Data
+**Fakultas:** Fakultas Teknik dan Design (FTD)
+**Institusi:** Institut Teknologi Sains Bandung
+
 Repositori: [github.com/angeliiee/Posyandu-Digitall](https://github.com/angeliiee/Posyandu-Digitall)
