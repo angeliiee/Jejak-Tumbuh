@@ -154,49 +154,80 @@ def get_db_status() -> dict:
     }
 
 
-# Gunakan folder sementara di Vercel dan folder data lokal di komputer
+
+# Folder data awal yang ikut di repository GitHub
+SEED_DATA_DIR = APP_DIR / "data"
+
+# Folder penyimpanan sementara di Vercel
 if os.environ.get("VERCEL"):
     DATA_DIR = Path("/tmp/jejak_tumbuh_data")
 else:
-    DATA_DIR = APP_DIR / "data"
+    DATA_DIR = SEED_DATA_DIR
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+# Daftar file CSV
 CSV_FILES = {
-    "users": DATA_DIR / "users.csv",
-    "peserta": DATA_DIR / "peserta.csv",
-    "pemeriksaan_balita": DATA_DIR / "pemeriksaan_balita.csv",
-    "pemeriksaan_ibu_hamil": DATA_DIR / "pemeriksaan_ibu_hamil.csv",
-    "laporan": DATA_DIR / "laporan.csv",
-    "orang_tua": DATA_DIR / "orang_tua.csv",
+    "users": "users.csv",
+    "peserta": "peserta.csv",
+    "pemeriksaan_balita": "pemeriksaan_balita.csv",
+    "pemeriksaan_ibu_hamil": "pemeriksaan_ibu_hamil.csv",
+    "laporan": "laporan.csv",
+    "orang_tua": "orang_tua.csv",
 }
 
 
 def load_local_csv(table_name: str) -> pd.DataFrame:
-    """Membaca data dari file CSV lokal secara aman."""
-    path = CSV_FILES.get(table_name)
-    if not path or not path.exists():
+    """Membaca data sementara terlebih dahulu, lalu data awal dari repository."""
+    filename = CSV_FILES.get(table_name)
+
+    if not filename:
         return pd.DataFrame()
+
+    # Prioritaskan data yang sudah tersimpan di folder sementara
+    path = DATA_DIR / filename
+
+    # Jika belum ada, baca CSV bawaan dari repository
+    if not path.exists():
+        path = SEED_DATA_DIR / filename
+
+    if not path.exists():
+        return pd.DataFrame()
+
     try:
         df = pd.read_csv(path, dtype=str)
-        # Konversi kolom numerik yang umum
-        for num_col in ["berat_kg", "tinggi_cm", "lingkar_kepala_cm", "z_bb_u", "z_tb_u", "usia_bulan",
-                        "usia_ibu_tahun", "usia_kehamilan_minggu", "lila_cm", "sistol", "diastol", "hb_gdl", "tfu_cm", "djj_bpm"]:
+
+        for num_col in [
+            "berat_kg", "tinggi_cm", "lingkar_kepala_cm",
+            "z_bb_u", "z_tb_u", "usia_bulan", "usia_ibu_tahun",
+            "usia_kehamilan_minggu", "lila_cm", "sistol",
+            "diastol", "hb_gdl", "tfu_cm", "djj_bpm"
+        ]:
             if num_col in df.columns:
-                df[num_col] = pd.to_numeric(df[num_col], errors="coerce")
+                df[num_col] = pd.to_numeric(
+                    df[num_col], errors="coerce"
+                )
+
         return df
-    except Exception:
+
+    except Exception as e:
+        print(f"Error loading {table_name}: {e}")
         return pd.DataFrame()
 
 
 def save_local_csv(table_name: str, df: pd.DataFrame) -> bool:
-    """Menyimpan data ke file CSV lokal."""
-    path = CSV_FILES.get(table_name)
-    if not path:
+    """Menyimpan data ke folder lokal atau sementara."""
+    filename = CSV_FILES.get(table_name)
+
+    if not filename:
         return False
+
     try:
+        path = DATA_DIR / filename
         df.to_csv(path, index=False)
         return True
+
     except Exception as e:
         print(f"Error saving to {table_name}: {e}")
         return False
+
