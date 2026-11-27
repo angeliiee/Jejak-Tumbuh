@@ -269,4 +269,4 @@ python tests/test_web_app.py
 **Fakultas:** Fakultas Teknik dan Design (FTD)
 **Institusi:** Institut Teknologi Sains Bandung
 
-Repositori: https://jejak-tumbuh.vercel.app
+Link Aplikasi: https://jejak-tumbuh.vercel.app
